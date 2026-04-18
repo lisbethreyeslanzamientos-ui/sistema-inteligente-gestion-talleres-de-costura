@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema Inteligente Gestión Talleres de Costura · Cinthia Arena</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --rosa:#FFB5DA; --magenta:#D22085; --rosa-claro:#FFE4F2;
+  --rosa-mid:#F9C6E0; --blanco:#FFFFFF; --gris-bg:#FDF8FB;
+  --gris-txt:#3D1A2E; --verde:#1E7A45; --verde-bg:#D4F5E2;
+  --amarillo:#FFF2CC; --amarillo-b:#F0C040; --sombra:rgba(210,32,133,0.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Montserrat',sans-serif;background:var(--gris-bg);color:var(--gris-txt);min-height:100vh;}
+
+header{background:linear-gradient(135deg,var(--magenta) 0%,#FF6BB5 100%);padding:28px 24px 22px;text-align:center;position:relative;overflow:hidden;}
+header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 80% 20%,rgba(255,255,255,0.15) 0%,transparent 60%);pointer-events:none;}
+.logo-img{width:72px;height:72px;border-radius:50%;border:3px solid rgba(255,255,255,0.7);object-fit:cover;margin:0 auto 12px;display:block;box-shadow:0 4px 16px rgba(0,0,0,0.2);}
+header h1{font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(18px,4.5vw,28px);color:#fff;line-height:1.2;}
+header p{color:rgba(255,255,255,0.8);font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;margin-top:5px;}
+
+.tabs{display:flex;background:var(--magenta);overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex:1;min-width:100px;padding:12px 8px;background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.6);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap;}
+.tab:hover{color:#fff;background:rgba(255,255,255,0.08);}
+.tab.active{color:#fff;border-bottom-color:var(--rosa);background:rgba(255,255,255,0.12);}
+
+.panel{display:none;padding:20px 16px 48px;max-width:700px;margin:0 auto;}
+.panel.active{display:block;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.card{background:var(--blanco);border-radius:16px;box-shadow:0 4px 20px var(--sombra);margin-bottom:18px;overflow:hidden;}
+.card-header{background:linear-gradient(90deg,var(--magenta),#E8409A);padding:13px 18px;display:flex;align-items:center;gap:10px;}
+.card-header .icon{font-size:17px;}
+.card-header h2{font-family:'Playfair Display',serif;font-size:15px;color:#fff;font-weight:700;font-style:italic;}
+.card-header.soft{background:linear-gradient(90deg,#A0006A,var(--magenta));}
+.card-body{padding:18px;}
+
+.field-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+.field-label{flex:1;font-size:12px;font-weight:500;line-height:1.4;}
+.field-label small{display:block;color:#999;font-size:10px;font-weight:400;}
+
+input[type="number"],input[type="text"]{padding:8px 11px;border:2px solid var(--rosa);border-radius:8px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;color:var(--magenta);background:var(--amarillo);outline:none;transition:border-color .2s,box-shadow .2s;-moz-appearance:textfield;}
+input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;}
+input[type="number"]:focus,input[type="text"]:focus{border-color:var(--magenta);box-shadow:0 0 0 3px rgba(210,32,133,0.15);}
+input.w110{width:110px;text-align:right;}
+input.wfull{width:100%;text-align:left;font-weight:500;color:var(--gris-txt);}
+
+.result-row{display:flex;align-items:center;gap:10px;margin-bottom:7px;padding:9px 13px;background:var(--rosa-claro);border-radius:9px;border-left:4px solid var(--rosa);}
+.result-row.derived{background:var(--rosa-mid);border-left-color:var(--magenta);}
+.result-row.costo{background:#FFF0F0;border-left-color:#E08080;}
+.result-row .rl{flex:1;font-size:12px;font-weight:500;}
+.result-row .rv{font-size:13px;font-weight:700;color:var(--magenta);}
+.result-row.derived .rv{color:#8B0060;}
+.result-row.costo .rv{color:#A04040;}
+
+.subtotal-bar{display:flex;justify-content:space-between;align-items:center;padding:11px 15px;background:var(--rosa-mid);border-radius:9px;margin:12px 0 5px;}
+.subtotal-bar span{font-size:11px;font-weight:600;color:var(--magenta);}
+.subtotal-bar strong{font-size:14px;color:var(--magenta);}
+
+.total-final{background:linear-gradient(135deg,var(--magenta),#E8409A);border-radius:16px;padding:22px 18px;text-align:center;margin-top:18px;box-shadow:0 8px 30px rgba(210,32,133,0.3);}
+.total-final .tf-label{font-size:10px;font-weight:600;color:rgba(255,255,255,0.8);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+.total-final .tf-nombre{color:rgba(255,255,255,0.9);font-size:13px;font-weight:600;margin-bottom:6px;}
+.total-final .tf-value{font-family:'Playfair Display',serif;font-size:40px;font-weight:700;color:#fff;line-height:1;}
+.total-final .tf-sub{font-size:10px;color:rgba(255,255,255,0.65);margin-top:7px;}
+.total-final .tf-ganancia{display:inline-block;background:rgba(255,255,255,0.2);border-radius:20px;padding:5px 14px;margin-top:10px;font-size:11px;font-weight:600;color:#fff;}
+
+.divider{height:1px;background:var(--rosa-mid);margin:14px 0;}
+.nota{background:var(--amarillo);border:1px solid var(--amarillo-b);border-radius:9px;padding:11px 14px;font-size:11px;line-height:1.6;color:#5A4000;margin-top:14px;}
+.nota strong{color:#3A2800;}
+.badge{display:inline-block;background:var(--verde-bg);color:var(--verde);font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:0.5px;}
+.badge.gris{background:#EEE;color:#666;}
+
+.desglose{background:var(--blanco);border-radius:12px;overflow:hidden;margin-top:16px;box-shadow:0 2px 12px var(--sombra);}
+.desglose-header{background:var(--rosa-mid);padding:9px 14px;display:grid;grid-template-columns:1fr 80px 60px;gap:8px;}
+.desglose-header span{font-size:10px;font-weight:700;color:var(--magenta);letter-spacing:1px;text-transform:uppercase;}
+.desglose-header span:not(:first-child){text-align:right;}
+.desglose-row{display:grid;grid-template-columns:1fr 80px 60px;gap:8px;padding:9px 14px;border-bottom:1px solid #F5E8F0;}
+.desglose-row:last-child{border-bottom:none;}
+.desglose-row span{font-size:11px;font-weight:500;}
+.desglose-row span:not(:first-child){text-align:right;font-weight:600;color:var(--magenta);}
+.desglose-row span:last-child{color:#999;font-weight:500;}
+.desglose-row.ganancia-row{background:var(--verde-bg);}
+.desglose-row.ganancia-row span{color:var(--verde) !important;font-weight:700;}
+
+.registro-box{background:linear-gradient(135deg,#FFF0F8,var(--rosa-claro));border:2px solid var(--rosa);border-radius:14px;padding:18px;margin-top:18px;}
+.registro-box h3{font-family:'Playfair Display',serif;font-style:italic;font-size:15px;color:var(--magenta);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.registro-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.registro-grid .field-group{display:flex;flex-direction:column;gap:5px;}
+.registro-grid .field-group label{font-size:11px;font-weight:600;color:var(--magenta);}
+.registro-grid input{width:100%;text-align:left;font-weight:500;color:var(--gris-txt);background:var(--blanco);}
+.registro-grid .span2{grid-column:1/-1;}
+.btn-registrar{width:100%;padding:14px;background:var(--magenta);color:#fff;border:none;border-radius:10px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-registrar:hover{background:#A5006A;transform:translateY(-1px);box-shadow:0 4px 16px rgba(210,32,133,0.35);}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--verde);color:#fff;padding:12px 24px;border-radius:30px;font-size:12px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,0.2);transition:transform .4s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+.historial-filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.filter-btn{padding:7px 14px;border:2px solid var(--rosa);border-radius:20px;background:var(--blanco);color:var(--magenta);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;}
+.filter-btn.active,.filter-btn:hover{background:var(--magenta);color:#fff;border-color:var(--magenta);}
+
+.venta-item{background:var(--blanco);border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:0 2px 10px var(--sombra);border-left:4px solid var(--rosa);display:flex;gap:12px;align-items:flex-start;}
+.venta-item .vi-icon{font-size:22px;flex-shrink:0;margin-top:2px;}
+.venta-item .vi-body{flex:1;}
+.venta-item .vi-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;}
+.venta-item .vi-nombre{font-size:13px;font-weight:700;color:var(--gris-txt);}
+.venta-item .vi-precio{font-size:15px;font-weight:700;color:var(--magenta);}
+.venta-item .vi-meta{font-size:11px;color:#888;line-height:1.6;}
+.venta-item .vi-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+.vi-tag{font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;background:var(--rosa-claro);color:var(--magenta);}
+.vi-tag.green{background:var(--verde-bg);color:var(--verde);}
+.vi-tag.gray{background:#EEE;color:#666;}
+.delete-btn{background:none;border:none;cursor:pointer;color:#DDD;font-size:16px;padding:2px;transition:color .2s;flex-shrink:0;}
+.delete-btn:hover{color:#D22020;}
+
+.empty-state{text-align:center;padding:40px 20px;color:#CCC;}
+.empty-state .es-icon{font-size:48px;margin-bottom:12px;}
+.empty-state p{font-size:13px;line-height:1.6;}
+
+.totales-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;}
+.total-card{background:var(--blanco);border-radius:12px;padding:14px;text-align:center;box-shadow:0 2px 10px var(--sombra);}
+.total-card .tc-val{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--magenta);}
+.total-card .tc-val.green{color:var(--verde);}
+.total-card .tc-label{font-size:10px;font-weight:600;color:#999;letter-spacing:0.5px;text-transform:uppercase;margin-top:3px;}
+
+.proy-mes{background:var(--blanco);border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:0 2px 10px var(--sombra);}
+.proy-mes-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.proy-mes-header h3{font-size:13px;font-weight:700;color:var(--magenta);}
+.proy-mes-header .pm-total{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;}
+.proy-mes-header .pm-total.pos{color:var(--verde);}
+.proy-mes-header .pm-total.neg{color:#D22020;}
+.proy-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.ps-item{background:var(--rosa-claro);border-radius:8px;padding:8px;text-align:center;}
+.ps-item .ps-val{font-size:12px;font-weight:700;color:var(--magenta);}
+.ps-item .ps-label{font-size:9px;color:#888;margin-top:2px;font-weight:500;}
+.ps-item.green{background:var(--verde-bg);}
+.ps-item.green .ps-val{color:var(--verde);}
+.ps-item.red{background:#F8D7DA;}
+.ps-item.red .ps-val{color:#D22020;}
+
+/* ── CLIENTES ── */
+.cliente-item{background:var(--blanco);border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:0 2px 10px var(--sombra);border-left:4px solid var(--rosa);display:flex;gap:12px;align-items:center;}
+.cliente-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--magenta),#FF6BB5);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:#fff;flex-shrink:0;}
+.cliente-body{flex:1;}
+.cliente-nombre{font-size:13px;font-weight:700;color:var(--gris-txt);margin-bottom:3px;}
+.cliente-meta{font-size:11px;color:#888;line-height:1.6;}
+.cliente-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px;}
+.wa-btn{display:inline-flex;align-items:center;gap:5px;background:#25D366;color:#fff;border:none;border-radius:20px;padding:5px 12px;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;cursor:pointer;text-decoration:none;transition:all .2s;flex-shrink:0;}
+.wa-btn:hover{background:#1DA851;transform:translateY(-1px);}
+
+.clientes-search{width:100%;padding:10px 14px;border:2px solid var(--rosa);border-radius:10px;font-family:'Montserrat',sans-serif;font-size:12px;background:var(--blanco);color:var(--gris-txt);outline:none;margin-bottom:16px;}
+.clientes-search:focus{border-color:var(--magenta);}
+
+.clientes-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+.clientes-count{font-size:12px;font-weight:600;color:var(--magenta);}
+
+.step-card{display:flex;gap:13px;align-items:flex-start;background:var(--blanco);border-radius:12px;padding:15px;box-shadow:0 2px 10px var(--sombra);border-left:4px solid var(--rosa);margin-bottom:10px;}
+.step-num{width:30px;height:30px;flex-shrink:0;background:var(--magenta);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+.step-card h3{font-size:13px;font-weight:700;margin-bottom:3px;}
+.step-card p{font-size:11px;color:#777;line-height:1.5;}
+.color-key{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
+.ck-item{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:500;}
+.ck-dot{width:13px;height:13px;border-radius:3px;}
+
+.storage-badge{display:inline-flex;align-items:center;gap:5px;background:var(--verde-bg);color:var(--verde);font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;margin-top:8px;}
+
+@media(max-width:480px){
+  .registro-grid{grid-template-columns:1fr;}
+  .totales-bar{grid-template-columns:1fr 1fr;}
+  .proy-stats{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-screen" style="display:none;min-height:100vh;background:var(--gris-bg);align-items:center;justify-content:center;padding:20px;flex-direction:column;">
+  <div style="width:100%;max-width:380px;">
+    <div style="text-align:center;margin-bottom:28px;">
+      <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--magenta),#FF6BB5);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:32px;box-shadow:0 4px 16px rgba(210,32,133,0.3);">✂️</div>
+      <h1 style="font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(15px,4vw,22px);color:var(--magenta);line-height:1.3;">Sistema Inteligente Gestión Talleres de Costura</h1>
+      <p style="color:#999;font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;margin-top:5px;">Cinthia Arena · Fashion Designer</p>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="icon">🔐</span><h2 id="auth-title">Iniciar sesión</h2></div>
+      <div class="card-body">
+        <div id="auth-msg" style="display:none;padding:10px 14px;border-radius:8px;font-size:12px;font-weight:600;margin-bottom:14px;line-height:1.5;"></div>
+        <div id="form-login">
+          <div style="margin-bottom:12px;">
+            <label style="font-size:11px;font-weight:600;color:var(--magenta);display:block;margin-bottom:5px;">Email</label>
+            <input type="email" id="auth-email" placeholder="tu@email.com" class="wfull" style="width:100%;background:var(--blanco);" onkeydown="if(event.key==='Enter')handleAuthSubmit()">
+          </div>
+          <div style="margin-bottom:16px;">
+            <label style="font-size:11px;font-weight:600;color:var(--magenta);display:block;margin-bottom:5px;">Contraseña</label>
+            <input type="password" id="auth-password" placeholder="••••••••" class="wfull" style="width:100%;background:var(--blanco);" onkeydown="if(event.key==='Enter')handleAuthSubmit()">
+          </div>
+          <button class="btn-registrar" id="auth-btn" onclick="handleAuthSubmit()"><span>🔑</span> <span id="auth-btn-text">Iniciar sesión</span></button>
+          <div style="text-align:center;margin-top:12px;">
+            <button onclick="showForgot()" style="background:none;border:none;color:var(--magenta);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;cursor:pointer;text-decoration:underline;">¿Olvidaste tu contraseña?</button>
+          </div>
+          <div class="divider" style="margin:14px 0;"></div>
+          <p style="text-align:center;font-size:11px;color:#888;">¿Primera vez aquí? <button onclick="toggleSignup()" style="background:none;border:none;color:var(--magenta);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">Crear cuenta</button></p>
+        </div>
+        <div id="form-forgot" style="display:none;">
+          <p style="font-size:12px;color:#666;margin-bottom:14px;line-height:1.5;">Ingresa tu email y te enviaremos un enlace para restablecer tu contraseña.</p>
+          <div style="margin-bottom:16px;">
+            <label style="font-size:11px;font-weight:600;color:var(--magenta);display:block;margin-bottom:5px;">Email</label>
+            <input type="email" id="forgot-email" placeholder="tu@email.com" class="wfull" style="width:100%;background:var(--blanco);" onkeydown="if(event.key==='Enter')handleForgotPassword()">
+          </div>
+          <button class="btn-registrar" onclick="handleForgotPassword()"><span>📧</span> Enviar enlace</button>
+          <div style="text-align:center;margin-top:12px;">
+            <button onclick="showLogin()" style="background:none;border:none;color:var(--magenta);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;cursor:pointer;">← Volver al login</button>
+          </div>
+        </div>
+        <div id="form-recovery" style="display:none;">
+          <p style="font-size:12px;color:#666;margin-bottom:14px;line-height:1.5;">Ingresa tu nueva contraseña.</p>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:11px;font-weight:600;color:var(--magenta);display:block;margin-bottom:5px;">Nueva contraseña</label>
+            <input type="password" id="new-password" placeholder="••••••••" class="wfull" style="width:100%;background:var(--blanco);">
+          </div>
+          <div style="margin-bottom:16px;">
+            <label style="font-size:11px;font-weight:600;color:var(--magenta);display:block;margin-bottom:5px;">Confirmar contraseña</label>
+            <input type="password" id="confirm-password" placeholder="••••••••" class="wfull" style="width:100%;background:var(--blanco);">
+          </div>
+          <button class="btn-registrar" onclick="handleUpdatePassword()"><span>🔒</span> Guardar nueva contraseña</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="app-content" style="display:none">
+<header>
+  <img src="data:image/jpeg;base64,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" class="logo-img" alt="Cinthia Arena">
+  <h1>Sistema Inteligente Gestión Talleres de Costura</h1>
+  <p>Cinthia Arena · Fashion Designer</p>
+  <button onclick="handleLogout()" style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.2);border:1.5px solid rgba(255,255,255,0.5);color:#fff;border-radius:20px;padding:6px 14px;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:600;cursor:pointer;">Salir →</button>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('inicio',this)">🏠 Inicio</button>
+  <button class="tab" onclick="showTab('fijos',this)">📋 Costos Fijos</button>
+  <button class="tab" onclick="showTab('prenda',this)">👗 Por Prenda</button>
+  <button class="tab" onclick="showTab('historial',this)">📦 Mis Ventas</button>
+  <button class="tab" onclick="showTab('clientes',this)">👥 Clientes</button>
+  <button class="tab" onclick="showTab('proyeccion',this)">📊 Proyección</button>
+</div>
+
+<!-- ══ INICIO ══ -->
+<div class="panel active" id="tab-inicio">
+  <div class="card">
+    <div class="card-header"><span class="icon">✨</span><h2>¿Cómo usar esta calculadora?</h2></div>
+    <div class="card-body">
+      <div class="step-card"><div class="step-num">1</div><div><h3>Registra tus Costos Fijos</h3><p>Ve a <strong>📋 Costos Fijos</strong> e ingresa tus gastos mensuales y cuántas prendas vendiste el mes pasado.</p></div></div>
+      <div class="step-card"><div class="step-num">2</div><div><h3>Calcula el precio de tu prenda</h3><p>En <strong>👗 Por Prenda</strong> ingresa materiales y mano de obra. Cuando vendas, completa los datos de la clienta y haz clic en <em>Registrar Venta</em>.</p></div></div>
+      <div class="step-card"><div class="step-num">3</div><div><h3>Consulta tus ventas y clientes</h3><p>En <strong>📦 Mis Ventas</strong> verás el historial completo. En <strong>👥 Clientes</strong> tienes tu directorio con WhatsApp para contactarlas.</p></div></div>
+      <div class="step-card" style="border-left-color:var(--magenta)"><div class="step-num" style="background:var(--rosa);color:var(--magenta)">📊</div><div><h3>Sigue tu crecimiento</h3><p>La <strong>📊 Proyección</strong> se arma sola. Verde = ganancia, Rojo = necesitas vender más.</p></div></div>
+      <div class="divider"></div>
+      <p style="font-size:11px;font-weight:600;color:var(--magenta);margin-bottom:8px;letter-spacing:1px;text-transform:uppercase;">Código de colores</p>
+      <div class="color-key">
+        <div class="ck-item"><div class="ck-dot" style="background:#FFF2CC;border:1px solid #F0C040"></div>Tú lo editas</div>
+        <div class="ck-item"><div class="ck-dot" style="background:var(--verde-bg);border:1px solid #8FCF9B"></div>Automático</div>
+        <div class="ck-item"><div class="ck-dot" style="background:var(--rosa-mid);border:1px solid var(--rosa)"></div>Derivado</div>
+      </div>
+      <div class="storage-badge">💾 Tus datos se guardan automáticamente en este dispositivo</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ COSTOS FIJOS ══ -->
+<div class="panel" id="tab-fijos">
+  <div class="card">
+    <div class="card-header"><span class="icon">📋</span><h2>Costos Fijos Mensuales</h2></div>
+    <div class="card-body">
+      <p style="font-size:11px;color:#888;margin-bottom:14px;line-height:1.6">Gastos que pagas cada mes aunque no vendas ninguna prenda.</p>
+      <div class="field-row"><span class="field-label">Alquiler del taller</span><input type="number" class="w110" id="cf1" value="0" min="0" oninput="calcAll();saveConfig()"></div>
+      <div class="field-row"><span class="field-label">Electricidad</span><input type="number" class="w110" id="cf2" value="0" min="0" oninput="calcAll();saveConfig()"></div>
+      <div class="field-row"><span class="field-label">Agua</span><input type="number" class="w110" id="cf3" value="0" min="0" oninput="calcAll();saveConfig()"></div>
+      <div class="field-row"><span class="field-label">Internet</span><input type="number" class="w110" id="cf4" value="0" min="0" oninput="calcAll();saveConfig()"></div>
+      <div class="field-row"><span class="field-label">Telefonía móvil</span><input type="number" class="w110" id="cf5" value="0" min="0" oninput="calcAll();saveConfig()"></div>
+      <div class="field-row"><span class="field-label">Mantenimiento de máquinas</span><input type="number" class="w110" id="cf6" value="0" min="0" oninput="calcAll();saveConfig()"></div>
+      <div class="field-row"><span class="field-label">Contador / servicios profesionales</span><input type="number" class="w110" id="cf7" value="0" min="0" oninput="calcAll();saveConfig()"></div>
+      <div class="field-row"><span class="field-label">Impuestos / permisos</span><input type="number" class="w110" id="cf8" value="0" min="0" oninput="calcAll();saveConfig()"></div>
+      <div class="field-row"><span class="field-label">Marketing / publicidad</span><input type="number" class="w110" id="cf9" value="0" min="0" oninput="calcAll();saveConfig()"></div>
+      <div class="field-row"><span class="field-label">Otros gastos fijos</span><input type="number" class="w110" id="cf10" value="0" min="0" oninput="calcAll();saveConfig()"></div>
+      <div class="subtotal-bar"><span>TOTAL COSTOS FIJOS MENSUALES</span><strong id="total-cf">$0.00</strong></div>
+      <div class="divider"></div>
+      <div class="field-row">
+        <span class="field-label" style="font-weight:700;color:var(--magenta)">Prendas vendidas el mes pasado<small style="font-weight:400;color:#888">Actualiza al inicio de cada mes</small></span>
+        <input type="number" class="w110" id="prendas-mes" value="30" min="1" oninput="calcAll();saveConfig()" style="border-color:var(--magenta)">
+      </div>
+      <div class="result-row" style="margin-top:12px">
+        <span class="rl" style="font-weight:700;color:var(--verde)">▶ Cuota de costos fijos por prenda</span>
+        <span class="rv" id="cuota-prenda" style="color:var(--verde)">$0.00</span>
+      </div>
+      <div class="nota"><strong>💡 ¿Por qué el mes pasado?</strong> Usar ventas reales hace que el cálculo sea honesto con tu negocio.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ POR PRENDA ══ -->
+<div class="panel" id="tab-prenda">
+  <div class="card">
+    <div class="card-header"><span class="icon">👗</span><h2>Calculadora por Prenda</h2></div>
+    <div class="card-body">
+      <div class="field-row"><span class="field-label" style="font-weight:700">Nombre de la prenda</span><input type="text" id="nombre-prenda" value="Blusa básica" class="wfull" style="width:200px;background:var(--rosa-claro);border-color:var(--rosa)" oninput="calcAll()"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header soft"><span class="icon">🧵</span><h2>1. Materiales</h2></div>
+    <div class="card-body">
+      <div class="field-row"><span class="field-label">Tela</span><input type="number" class="w110" id="m1" value="0" min="0" step="0.5" oninput="calcAll()"></div>
+      <div class="field-row"><span class="field-label">Hilo</span><input type="number" class="w110" id="m2" value="0" min="0" step="0.1" oninput="calcAll()"></div>
+      <div class="field-row"><span class="field-label">Cierre / cremallera</span><input type="number" class="w110" id="m3" value="0" min="0" step="0.1" oninput="calcAll()"></div>
+      <div class="field-row"><span class="field-label">Botones</span><input type="number" class="w110" id="m4" value="0" min="0" step="0.1" oninput="calcAll()"></div>
+      <div class="field-row"><span class="field-label">Encaje / adornos</span><input type="number" class="w110" id="m5" value="0" min="0" step="0.1" oninput="calcAll()"></div>
+      <div class="field-row"><span class="field-label">Empaque</span><input type="number" class="w110" id="m6" value="0" min="0" step="0.1" oninput="calcAll()"></div>
+      <div class="field-row"><span class="field-label">Otros materiales</span><input type="number" class="w110" id="m7" value="0" min="0" step="0.1" oninput="calcAll()"></div>
+      <div class="subtotal-bar"><span>Subtotal materiales</span><strong id="sub-mat">$0.00</strong></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header soft"><span class="icon">🏠</span><h2>2. Cuota Costos Fijos</h2></div>
+    <div class="card-body">
+      <div class="result-row"><span class="rl">Cuota costos fijos por prenda<small style="color:#999;font-size:10px">Desde 📋 Costos Fijos</small></span><span class="rv" id="cuota-display2">$0.00</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header soft"><span class="icon">✂️</span><h2>3. Mano de Obra y Ganancia</h2></div>
+    <div class="card-body">
+      <p style="font-size:11px;color:#888;margin-bottom:12px;line-height:1.5">Ingresa solo lo que le pagas a tu costurera. El resto se calcula automáticamente.</p>
+      <p style="font-size:10px;font-weight:700;color:#888;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">— Costos de mano de obra —</p>
+      <div class="field-row" style="margin-bottom:10px">
+        <span class="field-label" style="font-weight:700;color:var(--magenta)">Mano de obra — costurera (X)<small style="font-weight:400;color:#888">El valor base de todos los cálculos</small></span>
+        <input type="number" class="w110" id="mo-cos" value="5" min="0" step="0.5" oninput="calcAll()" style="border-color:var(--magenta)">
+      </div>
+      <div class="result-row costo"><span class="rl">Patronaje y corte <span class="badge gris">= X · costo</span></span><span class="rv" id="mo-pat">$5.00</span></div>
+      <div class="subtotal-bar" style="background:#FFF0F0;"><span style="color:#A04040">Subtotal mano de obra (2X)</span><strong id="sub-mano" style="color:#A04040">$10.00</strong></div>
+      <div style="height:12px"></div>
+      <p style="font-size:10px;font-weight:700;color:#888;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">— Ganancia del taller —</p>
+      <div class="result-row derived"><span class="rl">Ganancia dueña del taller <span class="badge">= 2X</span></span><span class="rv" id="mo-due">$10.00</span></div>
+      <div class="result-row derived"><span class="rl">Reinversión / crecimiento <span class="badge">= X</span></span><span class="rv" id="mo-rei">$5.00</span></div>
+      <div class="subtotal-bar"><span>Subtotal ganancia taller (3X)</span><strong id="sub-gan">$15.00</strong></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="icon">✅</span><h2>Resumen Final</h2></div>
+    <div class="card-body">
+      <div class="result-row"><span class="rl">Materiales</span><span class="rv" id="res-mat">$0.00</span></div>
+      <div class="result-row"><span class="rl">Cuota costos fijos</span><span class="rv" id="res-cf">$0.00</span></div>
+      <div class="result-row costo"><span class="rl">Mano de obra (costurera + patronaje)</span><span class="rv" id="res-mo">$10.00</span></div>
+      <div class="result-row derived"><span class="rl">Ganancia taller (dueña + reinversión)</span><span class="rv" id="res-gan">$15.00</span></div>
+    </div>
+  </div>
+  <div class="total-final">
+    <div class="tf-label">Precio de venta</div>
+    <div class="tf-nombre" id="nombre-display">Blusa básica</div>
+    <div class="tf-value" id="precio-final">$25.00</div>
+    <div class="tf-sub">Materiales · costos fijos · mano de obra · ganancia · reinversión</div>
+    <div class="tf-ganancia">✨ Ganancia neta: <span id="ganancia-display">$15.00</span></div>
+  </div>
+  <div class="desglose">
+    <div class="desglose-header"><span>Concepto</span><span>Monto</span><span>% precio</span></div>
+    <div class="desglose-row"><span>Materiales</span><span id="d-mat">$0.00</span><span id="dp-mat">-</span></div>
+    <div class="desglose-row"><span>Costos fijos</span><span id="d-cf">$0.00</span><span id="dp-cf">-</span></div>
+    <div class="desglose-row"><span>Mano de obra costurera</span><span id="d-moc">$5.00</span><span id="dp-moc">-</span></div>
+    <div class="desglose-row"><span>Patronaje y corte</span><span id="d-pat2">$5.00</span><span id="dp-pat">-</span></div>
+    <div class="desglose-row ganancia-row"><span>Ganancia dueña del taller</span><span id="d-due2">$10.00</span><span id="dp-due">-</span></div>
+    <div class="desglose-row ganancia-row"><span>Reinversión / crecimiento</span><span id="d-rei2">$5.00</span><span id="dp-rei">-</span></div>
+  </div>
+  <div class="registro-box">
+    <h3>🛍️ Registrar esta venta</h3>
+    <div class="registro-grid">
+      <div class="field-group"><label>Nombre de la clienta</label><input type="text" id="r-clienta" placeholder="ej: María González" class="wfull" style="background:var(--blanco)"></div>
+      <div class="field-group"><label>WhatsApp</label><input type="text" id="r-wa" placeholder="ej: +58 412 0000000" class="wfull" style="background:var(--blanco)"></div>
+      <div class="field-group span2"><label>Cantidad de prendas iguales</label><input type="number" id="r-cant" value="1" min="1" style="width:120px;background:var(--blanco);text-align:left"></div>
+    </div>
+    <button class="btn-registrar" onclick="registrarVenta()"><span>✅</span> Registrar Venta</button>
+  </div>
+</div>
+
+<!-- ══ MIS VENTAS ══ -->
+<div class="panel" id="tab-historial">
+  <div class="totales-bar">
+    <div class="total-card"><div class="tc-val" id="tot-prendas">0</div><div class="tc-label">Prendas vendidas</div></div>
+    <div class="total-card"><div class="tc-val" id="tot-factura">$0</div><div class="tc-label">Facturación total</div></div>
+    <div class="total-card"><div class="tc-val green" id="tot-ganancia">$0</div><div class="tc-label">Ganancia taller</div></div>
+  </div>
+  <div class="historial-filters" id="filtros-mes"></div>
+  <div id="lista-ventas">
+    <div class="empty-state"><div class="es-icon">🧵</div><p>Todavía no hay ventas registradas.<br>Calcula una prenda en <strong>👗 Por Prenda</strong> y haz clic en <em>Registrar Venta</em>.</p></div>
+  </div>
+</div>
+
+<!-- ══ CLIENTES ══ -->
+<div class="panel" id="tab-clientes">
+  <div class="card">
+    <div class="card-header"><span class="icon">👥</span><h2>Directorio de Clientas</h2></div>
+    <div class="card-body">
+      <p style="font-size:11px;color:#888;margin-bottom:14px;line-height:1.6">Se construye automáticamente con cada venta registrada. Úsalo para contactar a tus clientas con promociones y novedades.</p>
+      <input type="text" class="clientes-search" id="clientes-search" placeholder="🔍  Buscar por nombre o WhatsApp..." oninput="renderClientes()">
+      <div class="clientes-header">
+        <span class="clientes-count" id="clientes-count">0 clientas</span>
+      </div>
+      <div id="lista-clientes">
+        <div class="empty-state"><div class="es-icon">👩‍🎨</div><p>Cuando registres tu primera venta,<br>tus clientas aparecerán aquí automáticamente.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PROYECCIÓN ══ -->
+<div class="panel" id="tab-proyeccion">
+  <div class="card">
+    <div class="card-header"><span class="icon">📊</span><h2>Proyección Mensual</h2></div>
+    <div class="card-body">
+      <p style="font-size:11px;color:#888;margin-bottom:16px;line-height:1.6">Resultado real = Facturación − (Costos variables + Costos fijos del mes). Verde = ganancia · Rojo = pérdida.</p>
+      <div id="proy-content">
+        <div class="empty-state"><div class="es-icon">📈</div><p>Registra tus primeras ventas y aquí verás el resumen mensual de tu taller.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+</div><!-- /#app-content -->
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────
+let ventas = [];
+let filtroMes = 'todos';
+
+// ─── HELPERS ─────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const usd = v => (v < 0 ? '-' : '') + '$' + Math.abs(v).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+const pct = (p, t) => t ? (p/t*100).toFixed(1)+'%' : '-';
+const gv  = id => parseFloat($(id).value) || 0;
+
+function getMesKey(date) {
+  const d = new Date(date);
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+}
+function getMesLabel(key) {
+  const [y,m] = key.split('-');
+  const n = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  return n[parseInt(m)-1] + ' ' + y;
+}
+function getCF() {
+  return [1,2,3,4,5,6,7,8,9,10].reduce((s,i) => s + gv('cf'+i), 0);
+}
+function initials(name) {
+  if (!name) return '?';
+  return name.trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+}
+
+// ─── LOCALSTORAGE ────────────────────────────────────────────
+function saveConfig() {
+  try {
+    const cfg = {};
+    for (let i=1;i<=10;i++) cfg['cf'+i] = gv('cf'+i);
+    cfg['prendas-mes'] = gv('prendas-mes');
+    localStorage.setItem('ca_config', JSON.stringify(cfg));
+  } catch(e) {}
+}
+function loadConfig() {
+  try {
+    const cfg = JSON.parse(localStorage.getItem('ca_config') || '{}');
+    for (let i=1;i<=10;i++) if (cfg['cf'+i] !== undefined) $('cf'+i).value = cfg['cf'+i];
+    if (cfg['prendas-mes']) $('prendas-mes').value = cfg['prendas-mes'];
+  } catch(e) {}
+}
+function saveVentas() {
+  try {
+    localStorage.setItem('ca_ventas', JSON.stringify(ventas));
+  } catch(e) {}
+}
+function loadVentas() {
+  try {
+    ventas = JSON.parse(localStorage.getItem('ca_ventas') || '[]');
+  } catch(e) { ventas = []; }
+}
+
+// ─── CÁLCULO ─────────────────────────────────────────────────
+function calcAll() {
+  const cf    = getCF();
+  const pm    = Math.max(gv('prendas-mes'), 1);
+  const cuota = cf / pm;
+  $('total-cf').textContent      = usd(cf);
+  $('cuota-prenda').textContent   = usd(cuota);
+  $('cuota-display2').textContent = usd(cuota);
+
+  const mat = [1,2,3,4,5,6,7].reduce((s,i) => s + gv('m'+i), 0);
+  $('sub-mat').textContent = usd(mat);
+
+  const X            = gv('mo-cos');
+  const pat          = X;
+  const due          = X * 2;
+  const rei          = X;
+  const subtotalMano = X * 2;
+  const subtotalGan  = X * 3;
+
+  $('mo-pat').textContent  = usd(pat);
+  $('mo-due').textContent  = usd(due);
+  $('mo-rei').textContent  = usd(rei);
+  $('sub-mano').textContent = usd(subtotalMano);
+  $('sub-gan').textContent  = usd(subtotalGan);
+
+  const precio   = mat + cuota + subtotalMano + subtotalGan;
+  const ganancia = subtotalGan;
+
+  $('res-mat').textContent        = usd(mat);
+  $('res-cf').textContent         = usd(cuota);
+  $('res-mo').textContent         = usd(subtotalMano);
+  $('res-gan').textContent        = usd(subtotalGan);
+  $('precio-final').textContent   = usd(precio);
+  $('ganancia-display').textContent = usd(ganancia);
+  $('nombre-display').textContent = $('nombre-prenda').value || 'Mi prenda';
+
+  $('d-mat').textContent  = usd(mat);        $('dp-mat').textContent = pct(mat, precio);
+  $('d-cf').textContent   = usd(cuota);      $('dp-cf').textContent  = pct(cuota, precio);
+  $('d-moc').textContent  = usd(X);          $('dp-moc').textContent = pct(X, precio);
+  $('d-pat2').textContent = usd(pat);        $('dp-pat').textContent = pct(pat, precio);
+  $('d-due2').textContent = usd(due);        $('dp-due').textContent = pct(due, precio);
+  $('d-rei2').textContent = usd(rei);        $('dp-rei').textContent = pct(rei, precio);
+}
+
+// ─── REGISTRAR VENTA ─────────────────────────────────────────
+function registrarVenta() {
+  try {
+    const cf           = getCF();
+    const pm           = Math.max(gv('prendas-mes'), 1);
+    const cuota        = cf / pm;
+    const mat          = [1,2,3,4,5,6,7].reduce((s,i) => s + gv('m'+i), 0);
+    const X            = gv('mo-cos');
+    const subtotalMano = X * 2;
+    const subtotalGan  = X * 3;
+    const precio       = mat + cuota + subtotalMano + subtotalGan;
+    const ganancia     = subtotalGan;
+    const cant         = Math.max(parseInt($('r-cant').value) || 1, 1);
+    const costoVar     = mat + subtotalMano;
+
+    ventas.push({
+      id:        Date.now(),
+      fecha:     new Date().toISOString(),
+      mesKey:    getMesKey(new Date()),
+      nombre:    $('nombre-prenda').value || 'Prenda',
+      clienta:   $('r-clienta').value.trim(),
+      whatsapp:  $('r-wa').value.trim(),
+      cantidad:  cant,
+      mat, cuotaCF: cuota, costoVar, ganancia, precio,
+    });
+
+    saveVentas();
+    $('r-clienta').value = '';
+    $('r-wa').value = '';
+    $('r-cant').value = '1';
+
+    filtroMes = 'todos';
+    showToast('✅ Venta registrada — ' + cant + ' ' + (cant>1?'prendas':'prenda'));
+    renderHistorial();
+    renderClientes();
+    renderProyeccion();
+  } catch(e) {
+    showToast('⚠️ Error al registrar. Intenta de nuevo.');
+  }
+}
+
+// ─── TOAST ───────────────────────────────────────────────────
+function showToast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ─── HISTORIAL ───────────────────────────────────────────────
+function renderHistorial() {
+  const filtradas = filtroMes === 'todos' ? ventas : ventas.filter(v => v.mesKey === filtroMes);
+  const totP = filtradas.reduce((s,v) => s + v.cantidad, 0);
+  const totF = filtradas.reduce((s,v) => s + v.precio * v.cantidad, 0);
+  const totG = filtradas.reduce((s,v) => s + v.ganancia * v.cantidad, 0);
+
+  $('tot-prendas').textContent  = totP;
+  $('tot-factura').textContent  = usd(totF);
+  $('tot-ganancia').textContent = usd(totG);
+
+  const mesesUnicos = [...new Set(ventas.map(v => v.mesKey))].sort();
+  const filtrosEl = $('filtros-mes');
+  filtrosEl.innerHTML = '';
+  if (ventas.length > 0) {
+    const b = document.createElement('button');
+    b.className = 'filter-btn' + (filtroMes==='todos'?' active':'');
+    b.textContent = 'Todas';
+    b.onclick = () => { filtroMes='todos'; renderHistorial(); };
+    filtrosEl.appendChild(b);
+    mesesUnicos.forEach(mk => {
+      const btn = document.createElement('button');
+      btn.className = 'filter-btn' + (filtroMes===mk?' active':'');
+      btn.textContent = getMesLabel(mk);
+      btn.onclick = () => { filtroMes=mk; renderHistorial(); };
+      filtrosEl.appendChild(btn);
+    });
+  }
+
+  const lista = $('lista-ventas');
+  if (filtradas.length === 0) {
+    lista.innerHTML = '<div class="empty-state"><div class="es-icon">🧵</div><p>Todavía no hay ventas registradas.<br>Calcula una prenda en <strong>👗 Por Prenda</strong> y haz clic en <em>Registrar Venta</em>.</p></div>';
+    return;
+  }
+  lista.innerHTML = '';
+  [...filtradas].reverse().forEach(v => {
+    const d = new Date(v.fecha);
+    const fs = d.toLocaleDateString('es-ES', {day:'2-digit', month:'short', year:'numeric'});
+    const item = document.createElement('div');
+    item.className = 'venta-item';
+    item.innerHTML = `
+      <div class="vi-icon">👗</div>
+      <div class="vi-body">
+        <div class="vi-top">
+          <div class="vi-nombre">${v.nombre}${v.cantidad>1?' <span style="color:var(--magenta);font-size:11px">×'+v.cantidad+'</span>':''}</div>
+          <div class="vi-precio">${usd(v.precio * v.cantidad)}</div>
+        </div>
+        <div class="vi-meta">${v.clienta?'👤 '+v.clienta+'  ':''}${v.whatsapp?'📱 '+v.whatsapp+'  ':''}📅 ${fs}</div>
+        <div class="vi-tags">
+          <span class="vi-tag">${v.cantidad} prenda${v.cantidad>1?'s':''}</span>
+          <span class="vi-tag gray">Mat: ${usd(v.mat * v.cantidad)}</span>
+          <span class="vi-tag green">Ganancia: ${usd(v.ganancia * v.cantidad)}</span>
+        </div>
+      </div>
+      <button class="delete-btn" onclick="eliminarVenta(${v.id})" title="Eliminar">✕</button>`;
+    lista.appendChild(item);
+  });
+}
+
+function eliminarVenta(id) {
+  ventas = ventas.filter(v => v.id !== id);
+  saveVentas();
+  renderHistorial();
+  renderClientes();
+  renderProyeccion();
+}
+
+// ─── CLIENTES ────────────────────────────────────────────────
+function renderClientes() {
+  const busqueda = ($('clientes-search').value || '').toLowerCase();
+
+  // Construir directorio agrupado por clienta
+  const mapa = {};
+  ventas.forEach(v => {
+    if (!v.clienta) return;
+    const key = v.clienta.toLowerCase();
+    if (!mapa[key]) {
+      mapa[key] = {
+        nombre:       v.clienta,
+        whatsapp:     v.whatsapp || '',
+        prendas:      0,
+        totalGastado: 0,
+        ultimaCompra: v.fecha,
+      };
+    }
+    mapa[key].prendas      += v.cantidad;
+    mapa[key].totalGastado += v.precio * v.cantidad;
+    if (v.fecha > mapa[key].ultimaCompra) {
+      mapa[key].ultimaCompra = v.fecha;
+      if (v.whatsapp) mapa[key].whatsapp = v.whatsapp;
+    }
+  });
+
+  let clientes = Object.values(mapa).sort((a,b) => b.totalGastado - a.totalGastado);
+
+  // Filtrar por búsqueda
+  if (busqueda) {
+    clientes = clientes.filter(c =>
+      c.nombre.toLowerCase().includes(busqueda) ||
+      c.whatsapp.includes(busqueda)
+    );
+  }
+
+  $('clientes-count').textContent = clientes.length + ' clienta' + (clientes.length !== 1 ? 's' : '');
+
+  const lista = $('lista-clientes');
+  if (clientes.length === 0) {
+    lista.innerHTML = '<div class="empty-state"><div class="es-icon">👩‍🎨</div><p>' +
+      (busqueda ? 'No se encontraron clientas con ese nombre o número.' : 'Cuando registres tu primera venta,<br>tus clientas aparecerán aquí automáticamente.') +
+      '</p></div>';
+    return;
+  }
+
+  lista.innerHTML = '';
+  clientes.forEach(c => {
+    const d = new Date(c.ultimaCompra);
+    const fs = d.toLocaleDateString('es-ES', {day:'2-digit', month:'short', year:'numeric'});
+    const waNum = c.whatsapp.replace(/[^0-9+]/g, '');
+    const waLink = waNum ? `https://wa.me/${waNum.replace('+','')}` : '';
+
+    const item = document.createElement('div');
+    item.className = 'cliente-item';
+    item.innerHTML = `
+      <div class="cliente-avatar">${initials(c.nombre)}</div>
+      <div class="cliente-body">
+        <div class="cliente-nombre">${c.nombre}</div>
+        <div class="cliente-meta">${c.whatsapp ? '📱 '+c.whatsapp+'  ' : ''}📅 Última compra: ${fs}</div>
+        <div class="cliente-tags">
+          <span class="vi-tag">${c.prendas} prenda${c.prendas!==1?'s':''}</span>
+          <span class="vi-tag green">Total: ${usd(c.totalGastado)}</span>
+        </div>
+      </div>
+      ${waLink ? `<a href="${waLink}" target="_blank" class="wa-btn">💬 WhatsApp</a>` : ''}
+    `;
+    lista.appendChild(item);
+  });
+}
+
+// ─── PROYECCIÓN ──────────────────────────────────────────────
+function renderProyeccion() {
+  const cf = getCF();
+  const contenedor = $('proy-content');
+
+  if (ventas.length === 0) {
+    contenedor.innerHTML = '<div class="empty-state"><div class="es-icon">📈</div><p>Registra tus primeras ventas y aquí verás el resumen mensual de tu taller.</p></div>';
+    return;
+  }
+
+  const mesesUnicos = [...new Set(ventas.map(v => v.mesKey))].sort();
+  contenedor.innerHTML = '';
+
+  mesesUnicos.forEach(mk => {
+    const vm        = ventas.filter(v => v.mesKey === mk);
+    const prendas   = vm.reduce((s,v) => s + v.cantidad, 0);
+    const factura   = vm.reduce((s,v) => s + v.precio * v.cantidad, 0);
+    const costosVar = vm.reduce((s,v) => s + v.costoVar * v.cantidad, 0);
+    const resultado = factura - costosVar - cf;
+    const isPos     = resultado >= 0;
+
+    const div = document.createElement('div');
+    div.className = 'proy-mes';
+    div.innerHTML = `
+      <div class="proy-mes-header">
+        <h3>📅 ${getMesLabel(mk)}</h3>
+        <div class="pm-total ${isPos?'pos':'neg'}">${usd(resultado)}</div>
+      </div>
+      <div class="proy-stats">
+        <div class="ps-item"><div class="ps-val">${prendas}</div><div class="ps-label">Prendas</div></div>
+        <div class="ps-item"><div class="ps-val">${usd(factura)}</div><div class="ps-label">Facturación</div></div>
+        <div class="ps-item"><div class="ps-val">${usd(costosVar)}</div><div class="ps-label">Costos variables</div></div>
+        <div class="ps-item"><div class="ps-val">${usd(cf)}</div><div class="ps-label">Costos fijos</div></div>
+        <div class="ps-item ${isPos?'green':'red'}" style="grid-column:1/-1">
+          <div class="ps-val">${usd(resultado)}</div>
+          <div class="ps-label">${isPos?'✅ Ganancia del mes':'⚠️ Pérdida del mes — necesitas vender más'}</div>
+        </div>
+      </div>`;
+    contenedor.appendChild(div);
+  });
+}
+
+// ─── TABS ────────────────────────────────────────────────────
+function showTab(id, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  $('tab-'+id).classList.add('active');
+  if (el) el.classList.add('active');
+}
+
+// ─── SUPABASE AUTH ────────────────────────────────────────────
+const _supa = supabase.createClient(
+  'https://sbrjmozxysqbouipwqbr.supabase.co',
+  'sb_publishable_620Hibvs1oxftChf2d2QoA_ZH-PO5DH'
+);
+let authMode = 'login';
+let appInitialized = false;
+
+_supa.auth.onAuthStateChange((event, session) => {
+  if (event === 'PASSWORD_RECOVERY') {
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app-content').style.display = 'none';
+    showRecovery();
+  } else if (session) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-content').style.display = 'block';
+    if (!appInitialized) {
+      appInitialized = true;
+      try { loadConfig(); loadVentas(); calcAll(); renderHistorial(); renderClientes(); renderProyeccion(); }
+      catch(e) { console.error('Error al inicializar:', e); }
+    }
+  } else {
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app-content').style.display = 'none';
+  }
+});
+
+function showAuthMsg(msg, ok) {
+  const el = document.getElementById('auth-msg');
+  el.textContent = msg; el.style.display = 'block';
+  el.style.background = ok ? '#D4F5E2' : '#FEE2E2';
+  el.style.color = ok ? '#1E7A45' : '#DC2626';
+}
+function clearAuthMsg() { document.getElementById('auth-msg').style.display = 'none'; }
+
+function showLogin() {
+  document.getElementById('form-login').style.display = 'block';
+  document.getElementById('form-forgot').style.display = 'none';
+  document.getElementById('form-recovery').style.display = 'none';
+  document.getElementById('auth-title').textContent = 'Iniciar sesión';
+  authMode = 'login';
+  document.getElementById('auth-btn-text').textContent = 'Iniciar sesión';
+  clearAuthMsg();
+}
+function showForgot() {
+  document.getElementById('form-login').style.display = 'none';
+  document.getElementById('form-forgot').style.display = 'block';
+  document.getElementById('form-recovery').style.display = 'none';
+  document.getElementById('auth-title').textContent = 'Recuperar contraseña';
+  clearAuthMsg();
+}
+function showRecovery() {
+  document.getElementById('form-login').style.display = 'none';
+  document.getElementById('form-forgot').style.display = 'none';
+  document.getElementById('form-recovery').style.display = 'block';
+  document.getElementById('auth-title').textContent = 'Nueva contraseña';
+  clearAuthMsg();
+}
+function toggleSignup() {
+  authMode = authMode === 'login' ? 'signup' : 'login';
+  const s = authMode === 'signup';
+  document.getElementById('auth-title').textContent = s ? 'Crear cuenta' : 'Iniciar sesión';
+  document.getElementById('auth-btn-text').textContent = s ? 'Crear cuenta' : 'Iniciar sesión';
+  clearAuthMsg();
+}
+async function handleAuthSubmit() {
+  const email = document.getElementById('auth-email').value.trim();
+  const pass  = document.getElementById('auth-password').value;
+  if (!email || !pass) { showAuthMsg('Completa todos los campos.', false); return; }
+  const btn = document.getElementById('auth-btn');
+  btn.disabled = true; btn.style.opacity = '0.7';
+  try {
+    const res = authMode === 'login'
+      ? await _supa.auth.signInWithPassword({ email, password: pass })
+      : await _supa.auth.signUp({ email, password: pass });
+    if (res.error) showAuthMsg(authErrMsg(res.error.message), false);
+    else if (authMode === 'signup') showAuthMsg('¡Cuenta creada! Revisa tu email para confirmar.', true);
+  } catch(e) { showAuthMsg('Error de conexión. Intenta de nuevo.', false); }
+  btn.disabled = false; btn.style.opacity = '1';
+}
+async function handleForgotPassword() {
+  const email = document.getElementById('forgot-email').value.trim();
+  if (!email) { showAuthMsg('Ingresa tu email.', false); return; }
+  try {
+    const { error } = await _supa.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
+    showAuthMsg(error ? authErrMsg(error.message) : '¡Enviado! Revisa tu email.', !error);
+  } catch(e) { showAuthMsg('Error de conexión. Intenta de nuevo.', false); }
+}
+async function handleUpdatePassword() {
+  const p1 = document.getElementById('new-password').value;
+  const p2 = document.getElementById('confirm-password').value;
+  if (p1.length < 6) { showAuthMsg('Mínimo 6 caracteres.', false); return; }
+  if (p1 !== p2) { showAuthMsg('Las contraseñas no coinciden.', false); return; }
+  try {
+    const { error } = await _supa.auth.updateUser({ password: p1 });
+    if (error) showAuthMsg(authErrMsg(error.message), false);
+    else showAuthMsg('¡Contraseña actualizada! Iniciando sesión...', true);
+  } catch(e) { showAuthMsg('Error. Intenta de nuevo.', false); }
+}
+async function handleLogout() {
+  appInitialized = false;
+  await _supa.auth.signOut();
+}
+function authErrMsg(m) {
+  if (m.includes('Invalid login credentials')) return 'Email o contraseña incorrectos.';
+  if (m.includes('Email not confirmed'))       return 'Confirma tu email antes de entrar.';
+  if (m.includes('User already registered'))   return 'Ya existe una cuenta con ese email.';
+  if (m.includes('Password should be'))        return 'La contraseña debe tener mínimo 6 caracteres.';
+  return 'Error: ' + m;
+}
+</script>
+</body>
+</html>
