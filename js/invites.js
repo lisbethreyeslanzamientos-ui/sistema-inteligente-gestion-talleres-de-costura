@@ -7,8 +7,8 @@ let _invites = [];
 async function isCurrentUserAdmin() {
   if (!window._uid) return false;
   try {
-    const { data } = await _supa.from('admins').select('user_id').eq('user_id', window._uid).maybeSingle();
-    return !!data;
+    const { data } = await _supa.from('perfiles').select('es_admin').eq('id', window._uid).maybeSingle();
+    return !!data && data.es_admin === true;
   } catch(e) { return false; }
 }
 
