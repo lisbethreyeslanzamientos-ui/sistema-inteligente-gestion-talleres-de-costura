@@ -167,10 +167,43 @@ input.wfull{width:100%;text-align:left;font-weight:500;color:var(--gris-txt);}
 
 .storage-badge{display:inline-flex;align-items:center;gap:5px;background:var(--verde-bg);color:var(--verde);font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;margin-top:8px;}
 
+/* ── PEDIDOS ── */
+.pedido-item{background:var(--blanco);border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:0 2px 10px var(--sombra);border-left:4px solid #F0C040;display:flex;gap:12px;align-items:flex-start;}
+.pedido-item.entregada{border-left-color:var(--magenta);background:linear-gradient(135deg,#FFF0F8,var(--blanco));}
+.estado-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;}
+.estado-badge.proceso{background:#FFF2CC;color:#856404;}
+.estado-badge.entregada{background:var(--magenta);color:#fff;}
+.toggle-estado{background:none;border:1.5px solid var(--rosa);color:var(--magenta);border-radius:20px;padding:4px 11px;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:600;cursor:pointer;transition:all .2s;}
+.toggle-estado:hover{background:var(--magenta);color:#fff;border-color:var(--magenta);}
+
+/* ── MEDIDAS ── */
+.medida-form{background:linear-gradient(135deg,#FFF0F8,var(--rosa-claro));border:2px solid var(--rosa);border-radius:14px;padding:18px;margin-bottom:18px;}
+.medida-form h3{font-family:'Playfair Display',serif;font-style:italic;font-size:15px;color:var(--magenta);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.medidas-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.med-group{display:flex;flex-direction:column;gap:4px;}
+.med-group label{font-size:10px;font-weight:700;color:var(--magenta);text-transform:uppercase;letter-spacing:0.4px;}
+.med-group input{width:100%;padding:8px 10px;border:2px solid var(--rosa);border-radius:8px;font-family:'Montserrat',sans-serif;font-size:12px;background:var(--blanco);color:var(--gris-txt);outline:none;}
+.med-group input:focus{border-color:var(--magenta);}
+.med-group.span2{grid-column:1/-1;}
+.med-section-title{grid-column:1/-1;font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:1px;margin-top:6px;padding-bottom:4px;border-bottom:1px solid var(--rosa-mid);}
+.medida-card{background:var(--blanco);border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:0 2px 10px var(--sombra);border-left:4px solid var(--magenta);}
+.medida-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.medida-card-nombre{font-size:14px;font-weight:700;color:var(--gris-txt);}
+.medida-card-actions{display:flex;gap:6px;flex-shrink:0;}
+.medidas-tabla{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;}
+.med-dato{background:var(--rosa-claro);border-radius:7px;padding:6px 8px;}
+.med-dato-label{font-size:9px;color:#888;font-weight:500;}
+.med-dato-val{font-size:12px;font-weight:700;color:var(--magenta);}
+.btn-editar{background:none;border:1.5px solid var(--rosa);color:var(--magenta);border-radius:20px;padding:4px 10px;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:600;cursor:pointer;}
+.btn-editar:hover{background:var(--rosa-claro);}
+
 @media(max-width:480px){
   .registro-grid{grid-template-columns:1fr;}
   .totales-bar{grid-template-columns:1fr 1fr;}
   .proy-stats{grid-template-columns:repeat(2,1fr);}
+  .medidas-tabla{grid-template-columns:repeat(2,1fr);}
+  .medidas-grid{grid-template-columns:1fr;}
+  .med-section-title,.med-group.span2{grid-column:1;}
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -181,7 +214,7 @@ input.wfull{width:100%;text-align:left;font-weight:500;color:var(--gris-txt);}
 <div id="login-screen" style="display:none;min-height:100vh;background:var(--gris-bg);align-items:center;justify-content:center;padding:20px;flex-direction:column;">
   <div style="width:100%;max-width:380px;">
     <div style="text-align:center;margin-bottom:28px;">
-      <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--magenta),#FF6BB5);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:32px;box-shadow:0 4px 16px rgba(210,32,133,0.3);">✂️</div>
+      <img id="login-logo" src="" alt="Cinthia Arena" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto 12px;display:block;box-shadow:0 4px 16px rgba(210,32,133,0.3);border:3px solid rgba(210,32,133,0.3);">
       <h1 style="font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(15px,4vw,22px);color:var(--magenta);line-height:1.3;">Sistema Inteligente Gestión Talleres de Costura</h1>
       <p style="color:#999;font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;margin-top:5px;">Cinthia Arena · Fashion Designer</p>
     </div>
@@ -192,18 +225,37 @@ input.wfull{width:100%;text-align:left;font-weight:500;color:var(--gris-txt);}
         <div id="form-login">
           <div style="margin-bottom:12px;">
             <label style="font-size:11px;font-weight:600;color:var(--magenta);display:block;margin-bottom:5px;">Email</label>
-            <input type="email" id="auth-email" placeholder="tu@email.com" class="wfull" style="width:100%;background:var(--blanco);" onkeydown="if(event.key==='Enter')handleAuthSubmit()">
+            <input type="email" id="auth-email" placeholder="tu@email.com" class="wfull" style="width:100%;background:var(--blanco);" onkeydown="if(event.key==='Enter')handleLogin()">
           </div>
           <div style="margin-bottom:16px;">
             <label style="font-size:11px;font-weight:600;color:var(--magenta);display:block;margin-bottom:5px;">Contraseña</label>
-            <input type="password" id="auth-password" placeholder="••••••••" class="wfull" style="width:100%;background:var(--blanco);" onkeydown="if(event.key==='Enter')handleAuthSubmit()">
+            <input type="password" id="auth-password" placeholder="••••••••" class="wfull" style="width:100%;background:var(--blanco);" onkeydown="if(event.key==='Enter')handleLogin()">
           </div>
-          <button class="btn-registrar" id="auth-btn" onclick="handleAuthSubmit()"><span>🔑</span> <span id="auth-btn-text">Iniciar sesión</span></button>
+          <button class="btn-registrar" onclick="handleLogin()"><span>🔑</span> Iniciar sesión</button>
           <div style="text-align:center;margin-top:12px;">
             <button onclick="showForgot()" style="background:none;border:none;color:var(--magenta);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;cursor:pointer;text-decoration:underline;">¿Olvidaste tu contraseña?</button>
           </div>
           <div class="divider" style="margin:14px 0;"></div>
-          <p style="text-align:center;font-size:11px;color:#888;">¿Primera vez aquí? <button onclick="toggleSignup()" style="background:none;border:none;color:var(--magenta);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">Crear cuenta</button></p>
+          <p style="text-align:center;font-size:11px;color:#888;">¿Primera vez? <button onclick="showSignup()" style="background:none;border:none;color:var(--magenta);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">Registrarse</button></p>
+        </div>
+        <div id="form-signup" style="display:none;">
+          <p style="font-size:11px;color:#666;margin-bottom:14px;line-height:1.5;">Solo correos autorizados pueden registrarse.</p>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:11px;font-weight:600;color:var(--magenta);display:block;margin-bottom:5px;">Email</label>
+            <input type="email" id="signup-email" placeholder="tu@email.com" class="wfull" style="width:100%;background:var(--blanco);">
+          </div>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:11px;font-weight:600;color:var(--magenta);display:block;margin-bottom:5px;">Contraseña</label>
+            <input type="password" id="signup-password" placeholder="Mínimo 6 caracteres" class="wfull" style="width:100%;background:var(--blanco);">
+          </div>
+          <div style="margin-bottom:16px;">
+            <label style="font-size:11px;font-weight:600;color:var(--magenta);display:block;margin-bottom:5px;">Confirmar contraseña</label>
+            <input type="password" id="signup-confirm" placeholder="••••••••" class="wfull" style="width:100%;background:var(--blanco);">
+          </div>
+          <button class="btn-registrar" onclick="handleSignup()"><span>✨</span> Crear cuenta</button>
+          <div style="text-align:center;margin-top:12px;">
+            <button onclick="showLogin()" style="background:none;border:none;color:var(--magenta);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;cursor:pointer;">← Ya tengo cuenta</button>
+          </div>
         </div>
         <div id="form-forgot" style="display:none;">
           <p style="font-size:12px;color:#666;margin-bottom:14px;line-height:1.5;">Ingresa tu email y te enviaremos un enlace para restablecer tu contraseña.</p>
@@ -246,6 +298,8 @@ input.wfull{width:100%;text-align:left;font-weight:500;color:var(--gris-txt);}
   <button class="tab" onclick="showTab('fijos',this)">📋 Costos Fijos</button>
   <button class="tab" onclick="showTab('prenda',this)">👗 Por Prenda</button>
   <button class="tab" onclick="showTab('historial',this)">📦 Mis Ventas</button>
+  <button class="tab" onclick="showTab('pedidos',this)">📌 Pedidos</button>
+  <button class="tab" onclick="showTab('medidas',this)">📏 Medidas</button>
   <button class="tab" onclick="showTab('clientes',this)">👥 Clientes</button>
   <button class="tab" onclick="showTab('proyeccion',this)">📊 Proyección</button>
 </div>
@@ -266,7 +320,7 @@ input.wfull{width:100%;text-align:left;font-weight:500;color:var(--gris-txt);}
         <div class="ck-item"><div class="ck-dot" style="background:var(--verde-bg);border:1px solid #8FCF9B"></div>Automático</div>
         <div class="ck-item"><div class="ck-dot" style="background:var(--rosa-mid);border:1px solid var(--rosa)"></div>Derivado</div>
       </div>
-      <div class="storage-badge">💾 Tus datos se guardan automáticamente en este dispositivo</div>
+      <div class="storage-badge">☁️ Tus datos se guardan en la nube — accede desde cualquier dispositivo</div>
     </div>
   </div>
 </div>
@@ -396,6 +450,73 @@ input.wfull{width:100%;text-align:left;font-weight:500;color:var(--gris-txt);}
   </div>
 </div>
 
+<!-- ══ PEDIDOS ══ -->
+<div class="panel" id="tab-pedidos">
+  <div class="card">
+    <div class="card-header"><span class="icon">📌</span><h2>Pedidos y Entregas</h2></div>
+    <div class="card-body">
+      <div class="historial-filters" id="filtros-pedidos">
+        <button class="filter-btn active" onclick="filtroEstado='todos';renderPedidos()">Todos</button>
+        <button class="filter-btn" onclick="filtroEstado='en_proceso';renderPedidos()">En proceso</button>
+        <button class="filter-btn" onclick="filtroEstado='entregada';renderPedidos()">Entregadas</button>
+      </div>
+      <div id="lista-pedidos"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MEDIDAS ══ -->
+<div class="panel" id="tab-medidas">
+  <div class="medida-form">
+    <h3>📏 <span id="medida-form-titulo">Nueva clienta</span></h3>
+    <div class="medidas-grid">
+      <div class="med-group span2">
+        <label>Nombre de la clienta *</label>
+        <input type="text" id="med-nombre" placeholder="Ej: María García" class="wfull">
+      </div>
+      <div class="med-group span2">
+        <label>Teléfono / WhatsApp</label>
+        <input type="text" id="med-telefono" placeholder="+1 234 567 8900" class="wfull">
+      </div>
+      <div class="med-section-title">Parte superior</div>
+      <div class="med-group"><label>Contorno de busto</label><input type="number" id="med-busto" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Contorno de cintura</label><input type="number" id="med-cintura" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Contorno de cadera</label><input type="number" id="med-cadera" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Largo de talle</label><input type="number" id="med-largo-talle" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Ancho de espalda</label><input type="number" id="med-ancho-espalda" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Largo de blusa</label><input type="number" id="med-largo-blusa" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Contorno de cuello</label><input type="number" id="med-cuello" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Largo de manga</label><input type="number" id="med-largo-manga" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Escote</label><input type="number" id="med-escote" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Caída de hombros</label><input type="number" id="med-hombros" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Sisa</label><input type="number" id="med-sisa" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-section-title">Parte inferior</div>
+      <div class="med-group"><label>Tiro delantero</label><input type="number" id="med-tiro-del" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Tiro trasero</label><input type="number" id="med-tiro-tras" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Largo de pantalón</label><input type="number" id="med-largo-pant" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Largo de vestido</label><input type="number" id="med-largo-vest" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Largo de blazer</label><input type="number" id="med-largo-blaz" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Largo de falda</label><input type="number" id="med-largo-fald" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group span2">
+        <label>Notas</label>
+        <input type="text" id="med-notas" placeholder="Observaciones especiales..." class="wfull">
+      </div>
+    </div>
+    <input type="hidden" id="med-edit-id" value="">
+    <div style="display:flex;gap:10px;">
+      <button class="btn-registrar" onclick="guardarMedida()" style="flex:1">💾 Guardar medidas</button>
+      <button id="btn-cancelar-med" onclick="cancelarEdicionMedida()" style="display:none;padding:14px 18px;background:none;border:2px solid var(--rosa);color:var(--magenta);border-radius:10px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Cancelar</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header soft"><span class="icon">📋</span><h2>Medidas guardadas</h2></div>
+    <div class="card-body">
+      <input type="text" class="clientes-search" id="medidas-search" placeholder="Buscar clienta..." oninput="renderMedidas()">
+      <div id="lista-medidas"></div>
+    </div>
+  </div>
+</div>
+
 <!-- ══ CLIENTES ══ -->
 <div class="panel" id="tab-clientes">
   <div class="card">
@@ -439,7 +560,6 @@ const $ = id => document.getElementById(id);
 const usd = v => (v < 0 ? '-' : '') + '$' + Math.abs(v).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 const pct = (p, t) => t ? (p/t*100).toFixed(1)+'%' : '-';
 const gv  = id => parseFloat($(id).value) || 0;
-
 function getMesKey(date) {
   const d = new Date(date);
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
@@ -457,30 +577,52 @@ function initials(name) {
   return name.trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
 }
 
-// ─── LOCALSTORAGE ────────────────────────────────────────────
+// ─── SUPABASE DATA ────────────────────────────────────────────
+let _cfSaveTimer = null;
 function saveConfig() {
-  try {
-    const cfg = {};
-    for (let i=1;i<=10;i++) cfg['cf'+i] = gv('cf'+i);
-    cfg['prendas-mes'] = gv('prendas-mes');
-    localStorage.setItem('ca_config', JSON.stringify(cfg));
-  } catch(e) {}
+  clearTimeout(_cfSaveTimer);
+  _cfSaveTimer = setTimeout(_doSaveConfig, 800);
 }
-function loadConfig() {
+async function _doSaveConfig() {
+  if (!window._uid) return;
+  clearTimeout(_cfSaveTimer);
+  const row = { user_id: window._uid };
+  for (let i=1;i<=10;i++) row['cf'+i] = gv('cf'+i);
+  row['prendas_mes'] = gv('prendas-mes');
   try {
-    const cfg = JSON.parse(localStorage.getItem('ca_config') || '{}');
-    for (let i=1;i<=10;i++) if (cfg['cf'+i] !== undefined) $('cf'+i).value = cfg['cf'+i];
-    if (cfg['prendas-mes']) $('prendas-mes').value = cfg['prendas-mes'];
-  } catch(e) {}
+    await _supa.from('costos_fijos').upsert(row, { onConflict: 'user_id' });
+  } catch(e) { console.error('saveConfig:', e); }
 }
-function saveVentas() {
+async function loadConfig() {
+  if (!window._uid) return;
   try {
-    localStorage.setItem('ca_ventas', JSON.stringify(ventas));
-  } catch(e) {}
+    const { data } = await _supa.from('costos_fijos').select('*').eq('user_id', window._uid).maybeSingle();
+    if (data) {
+      for (let i=1;i<=10;i++) if (data['cf'+i] !== undefined && data['cf'+i] !== null) $('cf'+i).value = data['cf'+i];
+      if (data['prendas_mes']) $('prendas-mes').value = data['prendas_mes'];
+    }
+  } catch(e) { console.error('loadConfig:', e); }
 }
-function loadVentas() {
+function saveVentas() {} // no-op: ventas saved individually on insert/delete
+async function loadVentas() {
+  if (!window._uid) { ventas = []; return; }
   try {
-    ventas = JSON.parse(localStorage.getItem('ca_ventas') || '[]');
+    const { data } = await _supa.from('ventas').select('*').eq('user_id', window._uid).order('fecha', { ascending: true });
+    ventas = (data || []).map(r => ({
+      id: r.id,
+      fecha: r.fecha,
+      mesKey: r.mes_key,
+      nombre: r.nombre || '',
+      clienta: r.clienta || '',
+      whatsapp: r.whatsapp || '',
+      cantidad: r.cantidad || 1,
+      mat: Number(r.mat) || 0,
+      cuotaCF: Number(r.cuota_cf) || 0,
+      costoVar: Number(r.costo_var) || 0,
+      ganancia: Number(r.ganancia) || 0,
+      precio: Number(r.precio) || 0,
+      estado: r.estado || 'en_proceso',
+    }));
   } catch(e) { ventas = []; }
 }
 
@@ -529,7 +671,8 @@ function calcAll() {
 }
 
 // ─── REGISTRAR VENTA ─────────────────────────────────────────
-function registrarVenta() {
+async function registrarVenta() {
+  if (!window._uid) { showToast('⚠️ Debes iniciar sesión.'); return; }
   try {
     const cf           = getCF();
     const pm           = Math.max(gv('prendas-mes'), 1);
@@ -542,26 +685,28 @@ function registrarVenta() {
     const ganancia     = subtotalGan;
     const cant         = Math.max(parseInt($('r-cant').value) || 1, 1);
     const costoVar     = mat + subtotalMano;
+    const fecha        = new Date().toISOString();
+    const mesKey       = getMesKey(new Date());
+    const nombre       = $('nombre-prenda').value || 'Prenda';
+    const clienta      = $('r-clienta').value.trim();
+    const whatsapp     = $('r-wa').value.trim();
 
-    ventas.push({
-      id:        Date.now(),
-      fecha:     new Date().toISOString(),
-      mesKey:    getMesKey(new Date()),
-      nombre:    $('nombre-prenda').value || 'Prenda',
-      clienta:   $('r-clienta').value.trim(),
-      whatsapp:  $('r-wa').value.trim(),
-      cantidad:  cant,
-      mat, cuotaCF: cuota, costoVar, ganancia, precio,
-    });
+    const { data, error } = await _supa.from('ventas').insert({
+      user_id: window._uid,
+      fecha, mes_key: mesKey, nombre, clienta, whatsapp,
+      cantidad: cant, mat, cuota_cf: cuota, costo_var: costoVar, ganancia, precio,
+      estado: 'en_proceso',
+    }).select('id').single();
+    if (error) throw error;
 
-    saveVentas();
+    ventas.push({ id: data.id, fecha, mesKey, nombre, clienta, whatsapp, cantidad: cant, mat, cuotaCF: cuota, costoVar, ganancia, precio, estado: 'en_proceso' });
     $('r-clienta').value = '';
     $('r-wa').value = '';
     $('r-cant').value = '1';
-
     filtroMes = 'todos';
     showToast('✅ Venta registrada — ' + cant + ' ' + (cant>1?'prendas':'prenda'));
     renderHistorial();
+    renderPedidos();
     renderClientes();
     renderProyeccion();
   } catch(e) {
@@ -636,12 +781,18 @@ function renderHistorial() {
   });
 }
 
-function eliminarVenta(id) {
-  ventas = ventas.filter(v => v.id !== id);
-  saveVentas();
-  renderHistorial();
-  renderClientes();
-  renderProyeccion();
+async function eliminarVenta(id) {
+  try {
+    const { error } = await _supa.from('ventas').delete().eq('id', id).eq('user_id', window._uid);
+    if (error) throw error;
+    ventas = ventas.filter(v => v.id !== id);
+    renderHistorial();
+    renderPedidos();
+    renderClientes();
+    renderProyeccion();
+  } catch(e) {
+    showToast('⚠️ Error al eliminar. Intenta de nuevo.');
+  }
 }
 
 // ─── CLIENTES ────────────────────────────────────────────────
@@ -772,21 +923,47 @@ const _supa = supabase.createClient(
 );
 let authMode = 'login';
 let appInitialized = false;
+let isRecoveryMode = false;
+
+// Detectar recuperación desde la URL antes de que disparen los eventos de auth
+(function() {
+  const hash = new URLSearchParams(window.location.hash.replace('#',''));
+  const search = new URLSearchParams(window.location.search);
+  if (hash.get('type') === 'recovery' || search.get('type') === 'recovery') {
+    isRecoveryMode = true;
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app-content').style.display = 'none';
+  }
+})();
+
+async function initApp() {
+  try {
+    await Promise.all([loadConfig(), loadVentas(), loadMedidas()]);
+    _mergeEstados();
+    calcAll();
+    renderHistorial();
+    renderPedidos();
+    renderClientes();
+    renderProyeccion();
+    renderMedidas();
+  } catch(e) { console.error('Error al inicializar:', e); }
+}
 
 _supa.auth.onAuthStateChange((event, session) => {
   if (event === 'PASSWORD_RECOVERY') {
+    isRecoveryMode = true;
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('app-content').style.display = 'none';
     showRecovery();
-  } else if (session) {
+  } else if (session && !isRecoveryMode) {
+    window._uid = session.user.id;
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app-content').style.display = 'block';
     if (!appInitialized) {
       appInitialized = true;
-      try { loadConfig(); loadVentas(); calcAll(); renderHistorial(); renderClientes(); renderProyeccion(); }
-      catch(e) { console.error('Error al inicializar:', e); }
+      initApp();
     }
-  } else {
+  } else if (!session && !isRecoveryMode) {
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('app-content').style.display = 'none';
   }
@@ -802,15 +979,23 @@ function clearAuthMsg() { document.getElementById('auth-msg').style.display = 'n
 
 function showLogin() {
   document.getElementById('form-login').style.display = 'block';
+  document.getElementById('form-signup').style.display = 'none';
   document.getElementById('form-forgot').style.display = 'none';
   document.getElementById('form-recovery').style.display = 'none';
   document.getElementById('auth-title').textContent = 'Iniciar sesión';
-  authMode = 'login';
-  document.getElementById('auth-btn-text').textContent = 'Iniciar sesión';
+  clearAuthMsg();
+}
+function showSignup() {
+  document.getElementById('form-login').style.display = 'none';
+  document.getElementById('form-signup').style.display = 'block';
+  document.getElementById('form-forgot').style.display = 'none';
+  document.getElementById('form-recovery').style.display = 'none';
+  document.getElementById('auth-title').textContent = 'Registrarse';
   clearAuthMsg();
 }
 function showForgot() {
   document.getElementById('form-login').style.display = 'none';
+  document.getElementById('form-signup').style.display = 'none';
   document.getElementById('form-forgot').style.display = 'block';
   document.getElementById('form-recovery').style.display = 'none';
   document.getElementById('auth-title').textContent = 'Recuperar contraseña';
@@ -818,32 +1003,38 @@ function showForgot() {
 }
 function showRecovery() {
   document.getElementById('form-login').style.display = 'none';
+  document.getElementById('form-signup').style.display = 'none';
   document.getElementById('form-forgot').style.display = 'none';
   document.getElementById('form-recovery').style.display = 'block';
   document.getElementById('auth-title').textContent = 'Nueva contraseña';
   clearAuthMsg();
 }
-function toggleSignup() {
-  authMode = authMode === 'login' ? 'signup' : 'login';
-  const s = authMode === 'signup';
-  document.getElementById('auth-title').textContent = s ? 'Crear cuenta' : 'Iniciar sesión';
-  document.getElementById('auth-btn-text').textContent = s ? 'Crear cuenta' : 'Iniciar sesión';
-  clearAuthMsg();
-}
-async function handleAuthSubmit() {
+async function handleLogin() {
   const email = document.getElementById('auth-email').value.trim();
   const pass  = document.getElementById('auth-password').value;
   if (!email || !pass) { showAuthMsg('Completa todos los campos.', false); return; }
-  const btn = document.getElementById('auth-btn');
-  btn.disabled = true; btn.style.opacity = '0.7';
   try {
-    const res = authMode === 'login'
-      ? await _supa.auth.signInWithPassword({ email, password: pass })
-      : await _supa.auth.signUp({ email, password: pass });
-    if (res.error) showAuthMsg(authErrMsg(res.error.message), false);
-    else if (authMode === 'signup') showAuthMsg('¡Cuenta creada! Revisa tu email para confirmar.', true);
+    const { error } = await _supa.auth.signInWithPassword({ email, password: pass });
+    if (error) showAuthMsg(authErrMsg(error.message), false);
   } catch(e) { showAuthMsg('Error de conexión. Intenta de nuevo.', false); }
-  btn.disabled = false; btn.style.opacity = '1';
+}
+async function handleSignup() {
+  const email   = document.getElementById('signup-email').value.trim();
+  const pass    = document.getElementById('signup-password').value;
+  const confirm = document.getElementById('signup-confirm').value;
+  if (!email || !pass) { showAuthMsg('Completa todos los campos.', false); return; }
+  if (pass.length < 6)  { showAuthMsg('La contraseña debe tener mínimo 6 caracteres.', false); return; }
+  if (pass !== confirm) { showAuthMsg('Las contraseñas no coinciden.', false); return; }
+  try {
+    const { data, error } = await _supa.from('lista_blanca').select('email').eq('email', email).single();
+    if (error || !data) {
+      showAuthMsg('Tu correo no está autorizado. Contacta a Cinthia Arena para acceder.', false);
+      return;
+    }
+    const { error: signUpError } = await _supa.auth.signUp({ email, password: pass });
+    if (signUpError) showAuthMsg(authErrMsg(signUpError.message), false);
+    else showAuthMsg('¡Cuenta creada! Ya puedes iniciar sesión.', true);
+  } catch(e) { showAuthMsg('Error de conexión. Intenta de nuevo.', false); }
 }
 async function handleForgotPassword() {
   const email = document.getElementById('forgot-email').value.trim();
@@ -860,12 +1051,26 @@ async function handleUpdatePassword() {
   if (p1 !== p2) { showAuthMsg('Las contraseñas no coinciden.', false); return; }
   try {
     const { error } = await _supa.auth.updateUser({ password: p1 });
-    if (error) showAuthMsg(authErrMsg(error.message), false);
-    else showAuthMsg('¡Contraseña actualizada! Iniciando sesión...', true);
+    if (error) {
+      showAuthMsg(authErrMsg(error.message), false);
+    } else {
+      isRecoveryMode = false;
+      showAuthMsg('¡Contraseña actualizada! Ya puedes iniciar sesión.', true);
+      setTimeout(() => { showLogin(); }, 2000);
+    }
   } catch(e) { showAuthMsg('Error. Intenta de nuevo.', false); }
 }
 async function handleLogout() {
+  if (isRecoveryMode) return;
+  await _doSaveConfig(); // flush any pending debounced save
   appInitialized = false;
+  window._uid = null;
+  ventas = [];
+  medidas = [];
+  for (let i=1;i<=10;i++) $('cf'+i).value = '0';
+  $('prendas-mes').value = '30';
+  calcAll();
+  renderHistorial();
   await _supa.auth.signOut();
 }
 function authErrMsg(m) {
@@ -875,6 +1080,192 @@ function authErrMsg(m) {
   if (m.includes('Password should be'))        return 'La contraseña debe tener mínimo 6 caracteres.';
   return 'Error: ' + m;
 }
+
+// ─── PEDIDOS ─────────────────────────────────────────────────
+let filtroEstado = 'todos';
+
+function _estadoKey() { return 'ca_estados_' + (window._uid || 'guest'); }
+function _getEstados() { try { return JSON.parse(localStorage.getItem(_estadoKey()) || '{}'); } catch(e) { return {}; } }
+function _setEstados(obj) { try { localStorage.setItem(_estadoKey(), JSON.stringify(obj)); } catch(e) {} }
+
+function _mergeEstados() {
+  const est = _getEstados();
+  ventas.forEach(v => { v.estado = est[String(v.id)] || v.estado || 'en_proceso'; });
+}
+
+function toggleEstado(id) {
+  const v = ventas.find(x => String(x.id) === String(id));
+  if (!v) return;
+  const nuevo = (v.estado || 'en_proceso') === 'entregada' ? 'en_proceso' : 'entregada';
+  v.estado = nuevo;
+  const est = _getEstados();
+  est[String(id)] = nuevo;
+  _setEstados(est);
+  renderPedidos();
+  showToast(nuevo === 'entregada' ? '✅ Marcada como entregada' : '📌 Marcada como en proceso');
+}
+
+function renderPedidos() {
+  document.querySelectorAll('#filtros-pedidos .filter-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', filtroEstado === ['todos','en_proceso','entregada'][i]);
+  });
+  const filtradas = filtroEstado === 'todos' ? ventas : ventas.filter(v => (v.estado||'en_proceso') === filtroEstado);
+  const lista = $('lista-pedidos');
+  if (filtradas.length === 0) {
+    lista.innerHTML = '<div class="empty-state"><div class="es-icon">📌</div><p>No hay pedidos aquí todavía.<br>Registra una venta en <strong>👗 Por Prenda</strong>.</p></div>';
+    return;
+  }
+  lista.innerHTML = '';
+  [...filtradas].reverse().forEach(v => {
+    const estado = v.estado || 'en_proceso';
+    const d = new Date(v.fecha);
+    const fs = d.toLocaleDateString('es-ES', {day:'2-digit', month:'short', year:'numeric'});
+    const item = document.createElement('div');
+    item.className = 'pedido-item' + (estado==='entregada'?' entregada':'');
+    item.innerHTML = `
+      <div class="vi-icon">${estado==='entregada'?'✅':'📌'}</div>
+      <div class="vi-body">
+        <div class="vi-top">
+          <div class="vi-nombre">${v.nombre}${v.cantidad>1?' <span style="font-size:11px;color:var(--magenta)">×'+v.cantidad+'</span>':''}</div>
+          <div class="vi-precio">${usd(v.precio*v.cantidad)}</div>
+        </div>
+        <div class="vi-meta">${v.clienta?'👤 '+v.clienta+'  ':''}${v.whatsapp?'📱 '+v.whatsapp+'  ':''}📅 ${fs}</div>
+        <div class="vi-tags" style="margin-top:8px">
+          <span class="estado-badge ${estado==='entregada'?'entregada':'proceso'}">${estado==='entregada'?'✓ Entregada':'⏳ En proceso'}</span>
+          <button class="toggle-estado" onclick="toggleEstado('${v.id}')">${estado==='entregada'?'Marcar en proceso':'Marcar entregada'}</button>
+        </div>
+      </div>`;
+    lista.appendChild(item);
+  });
+}
+
+// ─── MEDIDAS ─────────────────────────────────────────────────
+let medidas = [];
+const MED_CAMPOS = [
+  ['busto','contorno_busto'],['cintura','contorno_cintura'],['cadera','contorno_cadera'],
+  ['largo-talle','largo_talle'],['ancho-espalda','ancho_espalda'],['largo-blusa','largo_blusa'],
+  ['cuello','contorno_cuello'],['largo-manga','largo_manga'],['escote','escote'],
+  ['hombros','caida_hombros'],['sisa','sisa'],['tiro-del','tiro_delantero'],
+  ['tiro-tras','tiro_trasero'],['largo-pant','largo_pantalon'],['largo-vest','largo_vestido'],
+  ['largo-blaz','largo_blazer'],['largo-fald','largo_falda'],
+];
+const MED_LABELS = {
+  contorno_busto:'Busto', contorno_cintura:'Cintura', contorno_cadera:'Cadera',
+  largo_talle:'Talle', ancho_espalda:'Espalda', largo_blusa:'Blusa',
+  contorno_cuello:'Cuello', largo_manga:'Manga', escote:'Escote',
+  caida_hombros:'Hombros', sisa:'Sisa', tiro_delantero:'Tiro del.',
+  tiro_trasero:'Tiro tras.', largo_pantalon:'Pantalón', largo_vestido:'Vestido',
+  largo_blazer:'Blazer', largo_falda:'Falda',
+};
+
+async function loadMedidas() {
+  if (!window._uid) { medidas = []; return; }
+  try {
+    const { data } = await _supa.from('medidas').select('*').eq('user_id', window._uid).order('clienta', { ascending: true });
+    medidas = data || [];
+  } catch(e) { medidas = []; }
+}
+
+async function guardarMedida() {
+  const nombre = $('med-nombre').value.trim();
+  if (!nombre) { showToast('⚠️ Escribe el nombre de la clienta.'); return; }
+  if (!window._uid) return;
+  const row = { user_id: window._uid, clienta: nombre, telefono: $('med-telefono').value.trim(), notas: $('med-notas').value.trim() };
+  MED_CAMPOS.forEach(([htmlId, col]) => { const v = parseFloat($('med-'+htmlId).value); row[col] = isNaN(v) ? null : v; });
+  try {
+    const editId = $('med-edit-id').value;
+    if (editId) {
+      const { error } = await _supa.from('medidas').update(row).eq('id', editId).eq('user_id', window._uid);
+      if (error) throw error;
+      const idx = medidas.findIndex(m => m.id == editId);
+      if (idx >= 0) medidas[idx] = { ...medidas[idx], ...row };
+      showToast('✅ Medidas actualizadas');
+    } else {
+      const { data, error } = await _supa.from('medidas').insert(row).select('id').single();
+      if (error) throw error;
+      medidas.push({ ...row, id: data.id });
+      showToast('✅ Medidas guardadas');
+    }
+    limpiarFormMedida();
+    renderMedidas();
+  } catch(e) { showToast('⚠️ Error al guardar. Intenta de nuevo.'); }
+}
+
+function editarMedida(id) {
+  const m = medidas.find(x => x.id === id);
+  if (!m) return;
+  $('med-nombre').value = m.clienta || '';
+  $('med-telefono').value = m.telefono || '';
+  $('med-notas').value = m.notas || '';
+  MED_CAMPOS.forEach(([htmlId, col]) => { $('med-'+htmlId).value = m[col] != null ? m[col] : ''; });
+  $('med-edit-id').value = id;
+  $('medida-form-titulo').textContent = 'Editar — ' + m.clienta;
+  $('btn-cancelar-med').style.display = 'block';
+  document.getElementById('tab-medidas').scrollIntoView({ behavior: 'smooth' });
+}
+
+function cancelarEdicionMedida() { limpiarFormMedida(); }
+
+function limpiarFormMedida() {
+  $('med-nombre').value = '';
+  $('med-telefono').value = '';
+  $('med-notas').value = '';
+  MED_CAMPOS.forEach(([htmlId]) => { $('med-'+htmlId).value = ''; });
+  $('med-edit-id').value = '';
+  $('medida-form-titulo').textContent = 'Nueva clienta';
+  $('btn-cancelar-med').style.display = 'none';
+}
+
+async function eliminarMedida(id) {
+  if (!confirm('¿Eliminar las medidas de esta clienta?')) return;
+  try {
+    const { error } = await _supa.from('medidas').delete().eq('id', id).eq('user_id', window._uid);
+    if (error) throw error;
+    medidas = medidas.filter(m => m.id !== id);
+    renderMedidas();
+    showToast('🗑️ Medidas eliminadas');
+  } catch(e) { showToast('⚠️ Error al eliminar.'); }
+}
+
+function renderMedidas() {
+  const busq = ($('medidas-search').value || '').toLowerCase();
+  const filtradas = medidas.filter(m => !busq || (m.clienta||'').toLowerCase().includes(busq));
+  const lista = $('lista-medidas');
+  if (filtradas.length === 0) {
+    lista.innerHTML = '<div class="empty-state"><div class="es-icon">📏</div><p>No hay medidas guardadas todavía.<br>Agrega la primera clienta arriba.</p></div>';
+    return;
+  }
+  lista.innerHTML = '';
+  filtradas.forEach(m => {
+    const datosHTML = Object.entries(MED_LABELS)
+      .filter(([col]) => m[col] != null && m[col] !== '')
+      .map(([col, lbl]) => `<div class="med-dato"><div class="med-dato-label">${lbl}</div><div class="med-dato-val">${m[col]} cm</div></div>`)
+      .join('');
+    const card = document.createElement('div');
+    card.className = 'medida-card';
+    card.innerHTML = `
+      <div class="medida-card-header">
+        <div>
+          <div class="medida-card-nombre">👤 ${m.clienta}</div>
+          ${m.telefono?'<div style="font-size:11px;color:#888;margin-top:2px">📱 '+m.telefono+'</div>':''}
+        </div>
+        <div class="medida-card-actions">
+          <button class="btn-editar" onclick="editarMedida(${m.id})">✏️ Editar</button>
+          <button class="delete-btn" onclick="eliminarMedida(${m.id})" title="Eliminar">✕</button>
+        </div>
+      </div>
+      ${datosHTML?'<div class="medidas-tabla">'+datosHTML+'</div>':''}
+      ${m.notas?'<div style="font-size:11px;color:#888;margin-top:8px;padding:6px 8px;background:var(--amarillo);border-radius:6px">📝 '+m.notas+'</div>':''}`;
+    lista.appendChild(card);
+  });
+}
+
+// Copiar logo del header al login
+(function() {
+  const hdr = document.querySelector('.logo-img');
+  const lgn = document.getElementById('login-logo');
+  if (hdr && lgn) lgn.src = hdr.src;
+})();
 </script>
 </body>
 </html>
