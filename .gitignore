@@ -1,0 +1,9 @@
+js/env.config.js
+node_modules/
+dist/
+.DS_Store
+.env
+.env.local
+*.log
+.vscode/
+.idea/

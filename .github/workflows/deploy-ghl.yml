@@ -1,0 +1,52 @@
+name: Build & Deploy to GoHighLevel
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Inyectar credenciales reales antes del build (no están en el repo)
+      - name: Inject env.config.js
+        run: |
+          cat > js/env.config.js <<'EOF'
+          window.__ENV = {
+            SUPABASE_URL: '${{ secrets.SUPABASE_URL }}',
+            SUPABASE_ANON_KEY: '${{ secrets.SUPABASE_ANON_KEY }}',
+            GHL_INVITE_WEBHOOK: '${{ secrets.GHL_INVITE_WEBHOOK }}',
+            APP_URL: '${{ secrets.APP_URL }}'
+          };
+          EOF
+
+      - name: Build bundle
+        run: node scripts/build.js
+
+      - name: Upload to GoHighLevel
+        run: |
+          RESPONSE=$(curl -s -o /tmp/ghl_response.json -w "%{http_code}" \
+            -X PUT \
+            "https://services.leadconnectorhq.com/funnels/page/${{ secrets.GHL_PAGE_ID }}/content" \
+            -H "Authorization: Bearer ${{ secrets.GHL_API_KEY }}" \
+            -H "Version: 2021-07-28" \
+            -H "Content-Type: application/json" \
+            -d "{\"content\": $(jq -Rs . < dist/index.html)}")
+
+          echo "HTTP status: $RESPONSE"
+          cat /tmp/ghl_response.json
+
+          if [ "$RESPONSE" != "200" ]; then
+            echo "❌ Deploy falló con status $RESPONSE"
+            exit 1
+          fi
+          echo "✅ Deploy exitoso a GoHighLevel"

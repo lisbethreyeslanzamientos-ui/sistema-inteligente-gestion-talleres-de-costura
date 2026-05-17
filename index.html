@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema Inteligente Gestión Talleres de Costura · Cinthia Arena</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/env.config.js"></script>
+<script src="js/config.js"></script>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-screen" style="display:none;min-height:100vh;background:var(--gris-bg);align-items:center;justify-content:center;padding:20px;flex-direction:column;">
+  <div style="width:100%;max-width:380px;">
+    <div style="text-align:center;margin-bottom:28px;">
+      <img id="login-logo" src="" alt="Cinthia Arena" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto 12px;display:block;box-shadow:0 4px 16px rgba(210,32,133,0.3);border:3px solid rgba(210,32,133,0.3);">
+      <h1 style="font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(15px,4vw,22px);color:var(--magenta);line-height:1.3;">Sistema Inteligente Gestión Talleres de Costura</h1>
+      <p style="color:#999;font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;margin-top:5px;">Cinthia Arena · Fashion Designer</p>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="icon">🔐</span><h2 id="auth-title">Iniciar sesión</h2></div>
+      <div class="card-body">
+        <div id="auth-msg" style="display:none;padding:10px 14px;border-radius:8px;font-size:12px;font-weight:600;margin-bottom:14px;line-height:1.5;"></div>
+        <div id="form-login">
+          <div style="margin-bottom:12px;">
+            <label style="font-size:11px;font-weight:600;color:var(--magenta);display:block;margin-bottom:5px;">Email</label>
+            <input type="email" id="auth-email" placeholder="tu@email.com" class="wfull" style="width:100%;background:var(--blanco);" onkeydown="if(event.key==='Enter')handleLogin()">
+          </div>
+          <div style="margin-bottom:16px;">
+            <label style="font-size:11px;font-weight:600;color:var(--magenta);display:block;margin-bottom:5px;">Contraseña</label>
+            <input type="password" id="auth-password" placeholder="••••••••" class="wfull" style="width:100%;background:var(--blanco);" onkeydown="if(event.key==='Enter')handleLogin()">
+          </div>
+          <button class="btn-registrar" onclick="handleLogin()"><span>🔑</span> Iniciar sesión</button>
+          <div style="text-align:center;margin-top:12px;">
+            <button onclick="showForgot()" style="background:none;border:none;color:var(--magenta);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;cursor:pointer;text-decoration:underline;">¿Olvidaste tu contraseña?</button>
+          </div>
+          <div class="divider" style="margin:14px 0;"></div>
+          <p style="text-align:center;font-size:11px;color:#888;">¿Primera vez? <button onclick="showSignup()" style="background:none;border:none;color:var(--magenta);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">Registrarse</button></p>
+        </div>
+        <div id="form-signup" style="display:none;">
+          <p style="font-size:11px;color:#666;margin-bottom:14px;line-height:1.5;">Solo correos autorizados pueden registrarse.</p>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:11px;font-weight:600;color:var(--magenta);display:block;margin-bottom:5px;">Email</label>
+            <input type="email" id="signup-email" placeholder="tu@email.com" class="wfull" style="width:100%;background:var(--blanco);">
+          </div>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:11px;font-weight:600;color:var(--magenta);display:block;margin-bottom:5px;">Contraseña</label>
+            <input type="password" id="signup-password" placeholder="Mínimo 6 caracteres" class="wfull" style="width:100%;background:var(--blanco);">
+          </div>
+          <div style="margin-bottom:16px;">
+            <label style="font-size:11px;font-weight:600;color:var(--magenta);display:block;margin-bottom:5px;">Confirmar contraseña</label>
+            <input type="password" id="signup-confirm" placeholder="••••••••" class="wfull" style="width:100%;background:var(--blanco);">
+          </div>
+          <button class="btn-registrar" onclick="handleSignup()"><span>✨</span> Crear cuenta</button>
+          <div style="text-align:center;margin-top:12px;">
+            <button onclick="showLogin()" style="background:none;border:none;color:var(--magenta);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;cursor:pointer;">← Ya tengo cuenta</button>
+          </div>
+        </div>
+        <div id="form-forgot" style="display:none;">
+          <p style="font-size:12px;color:#666;margin-bottom:14px;line-height:1.5;">Ingresa tu email y te enviaremos un enlace para restablecer tu contraseña.</p>
+          <div style="margin-bottom:16px;">
+            <label style="font-size:11px;font-weight:600;color:var(--magenta);display:block;margin-bottom:5px;">Email</label>
+            <input type="email" id="forgot-email" placeholder="tu@email.com" class="wfull" style="width:100%;background:var(--blanco);" onkeydown="if(event.key==='Enter')handleForgotPassword()">
+          </div>
+          <button class="btn-registrar" onclick="handleForgotPassword()"><span>📧</span> Enviar enlace</button>
+          <div style="text-align:center;margin-top:12px;">
+            <button onclick="showLogin()" style="background:none;border:none;color:var(--magenta);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;cursor:pointer;">← Volver al login</button>
+          </div>
+        </div>
+        <div id="form-recovery" style="display:none;">
+          <p style="font-size:12px;color:#666;margin-bottom:14px;line-height:1.5;">Ingresa tu nueva contraseña.</p>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:11px;font-weight:600;color:var(--magenta);display:block;margin-bottom:5px;">Nueva contraseña</label>
+            <input type="password" id="new-password" placeholder="••••••••" class="wfull" style="width:100%;background:var(--blanco);">
+          </div>
+          <div style="margin-bottom:16px;">
+            <label style="font-size:11px;font-weight:600;color:var(--magenta);display:block;margin-bottom:5px;">Confirmar contraseña</label>
+            <input type="password" id="confirm-password" placeholder="••••••••" class="wfull" style="width:100%;background:var(--blanco);">
+          </div>
+          <button class="btn-registrar" onclick="handleUpdatePassword()"><span>🔒</span> Guardar nueva contraseña</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="app-content" style="display:none">
+<header>
+  <img src="data:image/jpeg;base64,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" class="logo-img" alt="Cinthia Arena">
+  <h1>Sistema Inteligente Gestión Talleres de Costura</h1>
+  <p>Cinthia Arena · Fashion Designer</p>
+  <button onclick="handleLogout()" style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.2);border:1.5px solid rgba(255,255,255,0.5);color:#fff;border-radius:20px;padding:6px 14px;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:600;cursor:pointer;">Salir →</button>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('inicio',this)">🏠 Inicio</button>
+  <button class="tab" onclick="showTab('fijos',this)">📋 Costos Fijos</button>
+  <button class="tab" onclick="showTab('prenda',this)">👗 Por Prenda</button>
+  <button class="tab" onclick="showTab('historial',this)">📦 Mis Ventas</button>
+  <button class="tab" onclick="showTab('pedidos',this)">📌 Pedidos</button>
+  <button class="tab" onclick="showTab('medidas',this)">📏 Medidas</button>
+  <button class="tab" onclick="showTab('clientes',this)">👥 Clientes</button>
+  <button class="tab" onclick="showTab('proyeccion',this)">📊 Proyección</button>
+  <button class="tab admin-only" onclick="showTab('invitaciones',this)">✉️ Invitaciones</button>
+</div>
+
+<!-- ══ INICIO ══ -->
+<div class="panel active" id="tab-inicio">
+  <div class="card">
+    <div class="card-header"><span class="icon">✨</span><h2>¿Cómo usar esta calculadora?</h2></div>
+    <div class="card-body">
+      <div class="step-card"><div class="step-num">1</div><div><h3>Registra tus Costos Fijos</h3><p>Ve a <strong>📋 Costos Fijos</strong> e ingresa tus gastos mensuales y cuántas prendas vendiste el mes pasado.</p></div></div>
+      <div class="step-card"><div class="step-num">2</div><div><h3>Calcula el precio de tu prenda</h3><p>En <strong>👗 Por Prenda</strong> ingresa materiales y mano de obra. Cuando vendas, completa los datos de la clienta y haz clic en <em>Registrar Venta</em>.</p></div></div>
+      <div class="step-card"><div class="step-num">3</div><div><h3>Consulta tus ventas y clientes</h3><p>En <strong>📦 Mis Ventas</strong> verás el historial completo. En <strong>👥 Clientes</strong> tienes tu directorio con WhatsApp para contactarlas.</p></div></div>
+      <div class="step-card" style="border-left-color:var(--magenta)"><div class="step-num" style="background:var(--rosa);color:var(--magenta)">📊</div><div><h3>Sigue tu crecimiento</h3><p>La <strong>📊 Proyección</strong> se arma sola. Verde = ganancia, Rojo = necesitas vender más.</p></div></div>
+      <div class="divider"></div>
+      <p style="font-size:11px;font-weight:600;color:var(--magenta);margin-bottom:8px;letter-spacing:1px;text-transform:uppercase;">Código de colores</p>
+      <div class="color-key">
+        <div class="ck-item"><div class="ck-dot" style="background:#FFF2CC;border:1px solid #F0C040"></div>Tú lo editas</div>
+        <div class="ck-item"><div class="ck-dot" style="background:var(--verde-bg);border:1px solid #8FCF9B"></div>Automático</div>
+        <div class="ck-item"><div class="ck-dot" style="background:var(--rosa-mid);border:1px solid var(--rosa)"></div>Derivado</div>
+      </div>
+      <div class="storage-badge">☁️ Tus datos se guardan en la nube — accede desde cualquier dispositivo</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ COSTOS FIJOS ══ -->
+<div class="panel" id="tab-fijos">
+  <div class="card">
+    <div class="card-header"><span class="icon">📋</span><h2>Costos Fijos Mensuales</h2></div>
+    <div class="card-body">
+      <p style="font-size:11px;color:#888;margin-bottom:14px;line-height:1.6">Gastos que pagas cada mes aunque no vendas ninguna prenda.</p>
+      <div class="field-row"><span class="field-label">Alquiler del taller</span><input type="number" class="w110" id="cf1" value="0" min="0" oninput="calcAll();saveConfig()"></div>
+      <div class="field-row"><span class="field-label">Electricidad</span><input type="number" class="w110" id="cf2" value="0" min="0" oninput="calcAll();saveConfig()"></div>
+      <div class="field-row"><span class="field-label">Agua</span><input type="number" class="w110" id="cf3" value="0" min="0" oninput="calcAll();saveConfig()"></div>
+      <div class="field-row"><span class="field-label">Internet</span><input type="number" class="w110" id="cf4" value="0" min="0" oninput="calcAll();saveConfig()"></div>
+      <div class="field-row"><span class="field-label">Telefonía móvil</span><input type="number" class="w110" id="cf5" value="0" min="0" oninput="calcAll();saveConfig()"></div>
+      <div class="field-row"><span class="field-label">Mantenimiento de máquinas</span><input type="number" class="w110" id="cf6" value="0" min="0" oninput="calcAll();saveConfig()"></div>
+      <div class="field-row"><span class="field-label">Contador / servicios profesionales</span><input type="number" class="w110" id="cf7" value="0" min="0" oninput="calcAll();saveConfig()"></div>
+      <div class="field-row"><span class="field-label">Impuestos / permisos</span><input type="number" class="w110" id="cf8" value="0" min="0" oninput="calcAll();saveConfig()"></div>
+      <div class="field-row"><span class="field-label">Marketing / publicidad</span><input type="number" class="w110" id="cf9" value="0" min="0" oninput="calcAll();saveConfig()"></div>
+      <div class="field-row"><span class="field-label">Otros gastos fijos</span><input type="number" class="w110" id="cf10" value="0" min="0" oninput="calcAll();saveConfig()"></div>
+      <div class="subtotal-bar"><span>TOTAL COSTOS FIJOS MENSUALES</span><strong id="total-cf">$0.00</strong></div>
+      <div class="divider"></div>
+      <div class="field-row">
+        <span class="field-label" style="font-weight:700;color:var(--magenta)">Prendas vendidas el mes pasado<small style="font-weight:400;color:#888">Actualiza al inicio de cada mes</small></span>
+        <input type="number" class="w110" id="prendas-mes" value="30" min="1" oninput="calcAll();saveConfig()" style="border-color:var(--magenta)">
+      </div>
+      <div class="result-row" style="margin-top:12px">
+        <span class="rl" style="font-weight:700;color:var(--verde)">▶ Cuota de costos fijos por prenda</span>
+        <span class="rv" id="cuota-prenda" style="color:var(--verde)">$0.00</span>
+      </div>
+      <div class="nota"><strong>💡 ¿Por qué el mes pasado?</strong> Usar ventas reales hace que el cálculo sea honesto con tu negocio.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ POR PRENDA ══ -->
+<div class="panel" id="tab-prenda">
+  <div class="card">
+    <div class="card-header"><span class="icon">👗</span><h2>Calculadora por Prenda</h2></div>
+    <div class="card-body">
+      <div class="field-row"><span class="field-label" style="font-weight:700">Nombre de la prenda</span><input type="text" id="nombre-prenda" value="Blusa básica" class="wfull" style="width:200px;background:var(--rosa-claro);border-color:var(--rosa)" oninput="calcAll()"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header soft"><span class="icon">🧵</span><h2>1. Materiales</h2></div>
+    <div class="card-body">
+      <div class="field-row"><span class="field-label">Tela</span><input type="number" class="w110" id="m1" value="0" min="0" step="0.5" oninput="calcAll()"></div>
+      <div class="field-row"><span class="field-label">Hilo</span><input type="number" class="w110" id="m2" value="0" min="0" step="0.1" oninput="calcAll()"></div>
+      <div class="field-row"><span class="field-label">Cierre / cremallera</span><input type="number" class="w110" id="m3" value="0" min="0" step="0.1" oninput="calcAll()"></div>
+      <div class="field-row"><span class="field-label">Botones</span><input type="number" class="w110" id="m4" value="0" min="0" step="0.1" oninput="calcAll()"></div>
+      <div class="field-row"><span class="field-label">Encaje / adornos</span><input type="number" class="w110" id="m5" value="0" min="0" step="0.1" oninput="calcAll()"></div>
+      <div class="field-row"><span class="field-label">Empaque</span><input type="number" class="w110" id="m6" value="0" min="0" step="0.1" oninput="calcAll()"></div>
+      <div class="field-row"><span class="field-label">Otros materiales</span><input type="number" class="w110" id="m7" value="0" min="0" step="0.1" oninput="calcAll()"></div>
+      <div class="subtotal-bar"><span>Subtotal materiales</span><strong id="sub-mat">$0.00</strong></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header soft"><span class="icon">🏠</span><h2>2. Cuota Costos Fijos</h2></div>
+    <div class="card-body">
+      <div class="result-row"><span class="rl">Cuota costos fijos por prenda<small style="color:#999;font-size:10px">Desde 📋 Costos Fijos</small></span><span class="rv" id="cuota-display2">$0.00</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header soft"><span class="icon">✂️</span><h2>3. Mano de Obra y Ganancia</h2></div>
+    <div class="card-body">
+      <p style="font-size:11px;color:#888;margin-bottom:12px;line-height:1.5">Ingresa solo lo que le pagas a tu costurera. El resto se calcula automáticamente.</p>
+      <p style="font-size:10px;font-weight:700;color:#888;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">— Costos de mano de obra —</p>
+      <div class="field-row" style="margin-bottom:10px">
+        <span class="field-label" style="font-weight:700;color:var(--magenta)">Mano de obra — costurera (X)<small style="font-weight:400;color:#888">El valor base de todos los cálculos</small></span>
+        <input type="number" class="w110" id="mo-cos" value="5" min="0" step="0.5" oninput="calcAll()" style="border-color:var(--magenta)">
+      </div>
+      <div class="result-row costo"><span class="rl">Patronaje y corte <span class="badge gris">= X · costo</span></span><span class="rv" id="mo-pat">$5.00</span></div>
+      <div class="subtotal-bar" style="background:#FFF0F0;"><span style="color:#A04040">Subtotal mano de obra (2X)</span><strong id="sub-mano" style="color:#A04040">$10.00</strong></div>
+      <div style="height:12px"></div>
+      <p style="font-size:10px;font-weight:700;color:#888;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">— Ganancia del taller —</p>
+      <div class="result-row derived"><span class="rl">Ganancia dueña del taller <span class="badge">= 2X</span></span><span class="rv" id="mo-due">$10.00</span></div>
+      <div class="result-row derived"><span class="rl">Reinversión / crecimiento <span class="badge">= X</span></span><span class="rv" id="mo-rei">$5.00</span></div>
+      <div class="subtotal-bar"><span>Subtotal ganancia taller (3X)</span><strong id="sub-gan">$15.00</strong></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="icon">✅</span><h2>Resumen Final</h2></div>
+    <div class="card-body">
+      <div class="result-row"><span class="rl">Materiales</span><span class="rv" id="res-mat">$0.00</span></div>
+      <div class="result-row"><span class="rl">Cuota costos fijos</span><span class="rv" id="res-cf">$0.00</span></div>
+      <div class="result-row costo"><span class="rl">Mano de obra (costurera + patronaje)</span><span class="rv" id="res-mo">$10.00</span></div>
+      <div class="result-row derived"><span class="rl">Ganancia taller (dueña + reinversión)</span><span class="rv" id="res-gan">$15.00</span></div>
+    </div>
+  </div>
+  <div class="total-final">
+    <div class="tf-label">Precio de venta</div>
+    <div class="tf-nombre" id="nombre-display">Blusa básica</div>
+    <div class="tf-value" id="precio-final">$25.00</div>
+    <div class="tf-sub">Materiales · costos fijos · mano de obra · ganancia · reinversión</div>
+    <div class="tf-ganancia">✨ Ganancia neta: <span id="ganancia-display">$15.00</span></div>
+  </div>
+  <div class="desglose">
+    <div class="desglose-header"><span>Concepto</span><span>Monto</span><span>% precio</span></div>
+    <div class="desglose-row"><span>Materiales</span><span id="d-mat">$0.00</span><span id="dp-mat">-</span></div>
+    <div class="desglose-row"><span>Costos fijos</span><span id="d-cf">$0.00</span><span id="dp-cf">-</span></div>
+    <div class="desglose-row"><span>Mano de obra costurera</span><span id="d-moc">$5.00</span><span id="dp-moc">-</span></div>
+    <div class="desglose-row"><span>Patronaje y corte</span><span id="d-pat2">$5.00</span><span id="dp-pat">-</span></div>
+    <div class="desglose-row ganancia-row"><span>Ganancia dueña del taller</span><span id="d-due2">$10.00</span><span id="dp-due">-</span></div>
+    <div class="desglose-row ganancia-row"><span>Reinversión / crecimiento</span><span id="d-rei2">$5.00</span><span id="dp-rei">-</span></div>
+  </div>
+  <div class="registro-box">
+    <h3>🛍️ Registrar esta venta</h3>
+    <div class="registro-grid">
+      <div class="field-group"><label>Nombre de la clienta</label><input type="text" id="r-clienta" placeholder="ej: María González" class="wfull" style="background:var(--blanco)"></div>
+      <div class="field-group"><label>WhatsApp</label><input type="text" id="r-wa" placeholder="ej: +58 412 0000000" class="wfull" style="background:var(--blanco)"></div>
+      <div class="field-group span2"><label>Cantidad de prendas iguales</label><input type="number" id="r-cant" value="1" min="1" style="width:120px;background:var(--blanco);text-align:left"></div>
+    </div>
+    <button class="btn-registrar" onclick="registrarVenta()"><span>✅</span> Registrar Venta</button>
+  </div>
+</div>
+
+<!-- ══ MIS VENTAS ══ -->
+<div class="panel" id="tab-historial">
+  <div class="totales-bar">
+    <div class="total-card"><div class="tc-val" id="tot-prendas">0</div><div class="tc-label">Prendas vendidas</div></div>
+    <div class="total-card"><div class="tc-val" id="tot-factura">$0</div><div class="tc-label">Facturación total</div></div>
+    <div class="total-card"><div class="tc-val green" id="tot-ganancia">$0</div><div class="tc-label">Ganancia taller</div></div>
+  </div>
+  <div class="historial-filters" id="filtros-mes"></div>
+  <div id="lista-ventas">
+    <div class="empty-state"><div class="es-icon">🧵</div><p>Todavía no hay ventas registradas.<br>Calcula una prenda en <strong>👗 Por Prenda</strong> y haz clic en <em>Registrar Venta</em>.</p></div>
+  </div>
+</div>
+
+<!-- ══ PEDIDOS ══ -->
+<div class="panel" id="tab-pedidos">
+  <div class="card">
+    <div class="card-header"><span class="icon">📌</span><h2>Pedidos y Entregas</h2></div>
+    <div class="card-body">
+      <div class="historial-filters" id="filtros-pedidos">
+        <button class="filter-btn active" onclick="filtroEstado='todos';renderPedidos()">Todos</button>
+        <button class="filter-btn" onclick="filtroEstado='en_proceso';renderPedidos()">En proceso</button>
+        <button class="filter-btn" onclick="filtroEstado='entregada';renderPedidos()">Entregadas</button>
+      </div>
+      <div id="lista-pedidos"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MEDIDAS ══ -->
+<div class="panel" id="tab-medidas">
+  <div class="medida-form">
+    <h3>📏 <span id="medida-form-titulo">Nueva clienta</span></h3>
+    <div class="medidas-grid">
+      <div class="med-group span2">
+        <label>Nombre de la clienta *</label>
+        <input type="text" id="med-nombre" placeholder="Ej: María García" class="wfull">
+      </div>
+      <div class="med-group span2">
+        <label>Teléfono / WhatsApp</label>
+        <input type="text" id="med-telefono" placeholder="+1 234 567 8900" class="wfull">
+      </div>
+      <div class="med-section-title">Parte superior</div>
+      <div class="med-group"><label>Contorno de busto</label><input type="number" id="med-busto" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Contorno de cintura</label><input type="number" id="med-cintura" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Contorno de cadera</label><input type="number" id="med-cadera" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Largo de talle</label><input type="number" id="med-largo-talle" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Ancho de espalda</label><input type="number" id="med-ancho-espalda" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Largo de blusa</label><input type="number" id="med-largo-blusa" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Contorno de cuello</label><input type="number" id="med-cuello" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Largo de manga</label><input type="number" id="med-largo-manga" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Escote</label><input type="number" id="med-escote" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Caída de hombros</label><input type="number" id="med-hombros" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Sisa</label><input type="number" id="med-sisa" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-section-title">Parte inferior</div>
+      <div class="med-group"><label>Tiro delantero</label><input type="number" id="med-tiro-del" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Tiro trasero</label><input type="number" id="med-tiro-tras" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Largo de pantalón</label><input type="number" id="med-largo-pant" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Largo de vestido</label><input type="number" id="med-largo-vest" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Largo de blazer</label><input type="number" id="med-largo-blaz" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group"><label>Largo de falda</label><input type="number" id="med-largo-fald" placeholder="cm" step="0.5" min="0"></div>
+      <div class="med-group span2">
+        <label>Notas</label>
+        <input type="text" id="med-notas" placeholder="Observaciones especiales..." class="wfull">
+      </div>
+    </div>
+    <input type="hidden" id="med-edit-id" value="">
+    <div style="display:flex;gap:10px;">
+      <button class="btn-registrar" onclick="guardarMedida()" style="flex:1">💾 Guardar medidas</button>
+      <button id="btn-cancelar-med" onclick="cancelarEdicionMedida()" style="display:none;padding:14px 18px;background:none;border:2px solid var(--rosa);color:var(--magenta);border-radius:10px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Cancelar</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header soft"><span class="icon">📋</span><h2>Medidas guardadas</h2></div>
+    <div class="card-body">
+      <input type="text" class="clientes-search" id="medidas-search" placeholder="Buscar clienta..." oninput="renderMedidas()">
+      <div id="lista-medidas"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CLIENTES ══ -->
+<div class="panel" id="tab-clientes">
+  <div class="card">
+    <div class="card-header"><span class="icon">👥</span><h2>Directorio de Clientas</h2></div>
+    <div class="card-body">
+      <p style="font-size:11px;color:#888;margin-bottom:14px;line-height:1.6">Se construye automáticamente con cada venta registrada. Úsalo para contactar a tus clientas con promociones y novedades.</p>
+      <input type="text" class="clientes-search" id="clientes-search" placeholder="🔍  Buscar por nombre o WhatsApp..." oninput="renderClientes()">
+      <div class="clientes-header">
+        <span class="clientes-count" id="clientes-count">0 clientas</span>
+      </div>
+      <div id="lista-clientes">
+        <div class="empty-state"><div class="es-icon">👩‍🎨</div><p>Cuando registres tu primera venta,<br>tus clientas aparecerán aquí automáticamente.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PROYECCIÓN ══ -->
+<div class="panel" id="tab-proyeccion">
+  <div class="card">
+    <div class="card-header"><span class="icon">📊</span><h2>Proyección Mensual</h2></div>
+    <div class="card-body">
+      <p style="font-size:11px;color:#888;margin-bottom:16px;line-height:1.6">Resultado real = Facturación − (Costos variables + Costos fijos del mes). Verde = ganancia · Rojo = pérdida.</p>
+      <div id="proy-content">
+        <div class="empty-state"><div class="es-icon">📈</div><p>Registra tus primeras ventas y aquí verás el resumen mensual de tu taller.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ INVITACIONES (solo admin) ══ -->
+<div class="panel" id="tab-invitaciones">
+  <div class="card">
+    <div class="card-header"><span class="icon">✉️</span><h2>Gestión de Invitaciones</h2></div>
+    <div class="card-body">
+      <p style="font-size:11px;color:#888;margin-bottom:14px;line-height:1.6">Invita a nuevas usuarias por email. Recibirán un link único válido por 7 días para crear su cuenta.</p>
+      <div class="invite-form">
+        <div style="display:flex;gap:10px;align-items:flex-end;">
+          <div style="flex:1;">
+            <label style="font-size:11px;font-weight:600;color:var(--magenta);display:block;margin-bottom:5px;">Email de la invitada</label>
+            <input type="email" id="invite-email" placeholder="usuaria@email.com" class="wfull" style="width:100%;background:var(--blanco);" onkeydown="if(event.key==='Enter')createInvite()">
+          </div>
+          <button class="btn-registrar" onclick="createInvite()" style="width:auto;padding:10px 20px;">✉️ Invitar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header soft"><span class="icon">📋</span><h2>Invitaciones enviadas</h2></div>
+    <div class="card-body">
+      <div id="lista-invitaciones">
+        <div class="empty-state"><div class="es-icon">✉️</div><p>No hay invitaciones todavía.<br>Invita el primer correo arriba.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+</div><!-- /#app-content -->
+
+<script src="js/helpers.js"></script>
+<script src="js/data.js"></script>
+<script src="js/views.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/invites.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
