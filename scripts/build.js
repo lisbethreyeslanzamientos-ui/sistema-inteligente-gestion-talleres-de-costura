@@ -13,6 +13,16 @@ if (!fs.existsSync(DIST)) fs.mkdirSync(DIST);
 // ── Leer HTML base ────────────────────────────────────────────
 let html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 
+// ── Logo inline (para que GHL reciba un HTML self-contained) ─────
+const logoPath = path.join(ROOT, 'assets', 'logo.jpg');
+if (fs.existsSync(logoPath)) {
+  const logoB64 = fs.readFileSync(logoPath).toString('base64');
+  html = html.replace(
+    'src="assets/logo.jpg"',
+    `src="data:image/jpeg;base64,${logoB64}"`
+  );
+}
+
 // ── CSS inline ────────────────────────────────────────────────
 const css = fs.readFileSync(path.join(ROOT, 'css', 'styles.css'), 'utf8');
 html = html.replace(
@@ -37,14 +47,10 @@ let combinedJs = jsFiles
   .map(f => `// ===== ${f} =====\n` + fs.readFileSync(path.join(ROOT, f), 'utf8'))
   .join('\n\n');
 
-// Reemplazar todas las etiquetas <script src="js/..."> con el bloque combinado
-// y eliminar la etiqueta de env.config.js (la asumimos inyectada aparte)
-html = html.replace(/<script src="js\/env\.config\.js"><\/script>\n?/, '');
-html = html.replace(
-  // Captura desde el primer <script src="js/config.js"> hasta el último </script> de js/
-  /<script src="js\/config\.js"><\/script>[\s\S]*?<script src="js\/app\.js"><\/script>/,
-  `<script>\n${combinedJs}\n</script>`
-);
+// Eliminar todos los <script src="js/..."> (env.config.js se inyecta aparte en GHL)
+// e inyectar el bundle justo antes de </body>
+html = html.replace(/<script src="js\/[^"]+"><\/script>\n?/g, '');
+html = html.replace('</body>', `<script>\n${combinedJs}\n</script>\n</body>`);
 
 // ── Escribir dist/index.html ──────────────────────────────────
 const outPath = path.join(DIST, 'index.html');
